@@ -6,7 +6,7 @@ import { Avatar } from '@/components/ui/avatar'
 
 const route = useRoute()
 const isLoginPage = route.path === '/login'
-const isLoggedIn = ref(false);
+const isLoggedIn = ref(true);
 
 </script>
 
@@ -17,7 +17,7 @@ const isLoggedIn = ref(false);
       TrackFlow
     </h1>
     <nav class="flex gap-3">
-      <div v-if="isLoggedIn">
+      <div v-if="isLoggedIn" class="flex gap-3">
         <RouterLink :to="isLoginPage ? '/' : '/login'">
           <button
             class="text-emerald-600 border border-emerald-600 hover:bg-emerald-50 px-5 py-2 rounded-lg cursor-pointer">
