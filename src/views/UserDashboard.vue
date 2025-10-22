@@ -16,7 +16,6 @@ import {
 import CreateTicket from '@/components/CreateTicket.vue'
 import FilterTicket from '@/components/FilterTicket.vue'
 
-// 📝 Ticket list
 const tickets = ref<TicketPreview[]>([
     {
         id: 10,
@@ -41,29 +40,23 @@ const tickets = ref<TicketPreview[]>([
     },
 ])
 
-// 📝 Filter state
-const currentFilter = ref<'all' | 'open' | 'in_progress' | 'closed'>('all')
+const currentFilter = ref<'open' | 'in_progress' | 'closed'>('open')
 
-// 📝 Computed ticket counts for FilterTicket component
 const counts = computed(() => ({
-    all: tickets.value.length,
     open: tickets.value.filter(t => t.status === 'open').length,
     in_progress: tickets.value.filter(t => t.status === 'in_progress').length,
     closed: tickets.value.filter(t => t.status === 'closed').length,
 }))
 
-// 📝 Filtered ticket list depending on currentFilter
 const filteredTickets = computed(() => {
-    if (currentFilter.value === 'all') return tickets.value
     return tickets.value.filter(t => t.status === currentFilter.value)
 })
 
-// 📝 Handle filter change emitted from FilterTicket
-const handleFilterChange = (filter: 'all' | 'open' | 'in_progress' | 'closed') => {
+
+const handleFilterChange = (filter: 'open' | 'in_progress' | 'closed') => {
     currentFilter.value = filter
 }
 
-// 📝 Add new ticket from CreateTicket component
 const handleCreateTicket = (data: { title: string; description: string; priority: TicketPreview['priority'] }) => {
     const newTicket: TicketPreview = {
         id: Date.now(),
@@ -80,14 +73,12 @@ const handleCreateTicket = (data: { title: string; description: string; priority
 <template>
     <section class="py-4 px-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
-            <div class="flex flex-col md:flex-row md:items-center gap-6">
+            <div class="w-xl flex justify-between">
                 <h2 class="text-2xl font-semibold">My Tickets</h2>
 
-                <!-- ✅ Ticket filter with counts -->
                 <FilterTicket :counts="counts" @change-filter="handleFilterChange" />
             </div>
 
-            <!-- ✅ Dialog for creating tickets -->
             <Dialog>
                 <DialogTrigger asChild>
                     <Button class="cursor-pointer">Create Ticket</Button>
@@ -106,7 +97,6 @@ const handleCreateTicket = (data: { title: string; description: string; priority
             </Dialog>
         </div>
 
-        <!-- ✅ Filtered tickets -->
         <div v-if="filteredTickets.length" class="grid gap-4">
             <CardTicket v-for="t in filteredTickets" :key="t.id" :ticket="t" />
         </div>

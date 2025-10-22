@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import Button from './ui/button/Button.vue'
 
-type FilterType = 'all' | 'open' | 'in_progress' | 'closed'
+type FilterType = 'open' | 'in_progress' | 'closed'
 
 const props = defineProps<{
     counts: Record<FilterType, number>
@@ -12,10 +12,9 @@ const emit = defineEmits<{
     (e: 'change-filter', value: FilterType): void
 }>()
 
-const activeFilter = ref<FilterType>('all')
+const activeFilter = ref<FilterType>('open')
 
 const filters: { label: string; value: FilterType }[] = [
-    { label: 'All', value: 'all' },
     { label: 'Open', value: 'open' },
     { label: 'In Progress', value: 'in_progress' },
     { label: 'Closed', value: 'closed' },
@@ -28,7 +27,7 @@ const handleFilterClick = (filter: FilterType) => {
 </script>
 
 <template>
-    <div class="flex gap-2 flex-wrap">
+    <div class="flex gap-3">
         <Button v-for="f in filters" :key="f.value" variant="outline" @click="handleFilterClick(f.value)" :class="[
             activeFilter === f.value
                 ? 'bg-primary text-white border-primary'
