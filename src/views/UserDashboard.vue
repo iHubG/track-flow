@@ -16,6 +16,11 @@ import {
 import CreateTicket from '@/components/CreateTicket.vue'
 import FilterTicket from '@/components/FilterTicket.vue'
 
+import { useToast } from "vue-toastification"
+const toast = useToast()
+
+const isDialogOpen = ref(false)
+
 const tickets = ref<TicketPreview[]>([
     {
         id: 10,
@@ -67,6 +72,9 @@ const handleCreateTicket = (data: { title: string; description: string; priority
     }
 
     tickets.value.unshift(newTicket)
+    toast.success("Ticket created successfully!")
+    isDialogOpen.value = false
+
 }
 </script>
 
@@ -79,7 +87,7 @@ const handleCreateTicket = (data: { title: string; description: string; priority
                 <FilterTicket :counts="counts" @change-filter="handleFilterChange" />
             </div>
 
-            <Dialog>
+            <Dialog v-model:open="isDialogOpen">
                 <DialogTrigger asChild>
                     <Button class="cursor-pointer">Create Ticket</Button>
                 </DialogTrigger>
