@@ -3,9 +3,7 @@ import {
     Home,
     Ticket,
     Users,
-    BarChart3,
     Settings,
-    Bell,
 } from "lucide-vue-next"
 
 import {
@@ -23,7 +21,7 @@ import {
 const items = [
     {
         title: "Dashboard",
-        url: "/dashboard",
+        url: "/support/dashboard",
         icon: Home,
     },
     {
@@ -36,19 +34,10 @@ const items = [
         url: "/users",
         icon: Users,
     },
-    {
-        title: "Reports",
-        url: "/reports",
-        icon: BarChart3,
-    },
-    {
-        title: "Notifications",
-        url: "/notifications",
-        icon: Bell,
-    },
+
     {
         title: "Settings",
-        url: "/settings",
+        url: "/profile-settings",
         icon: Settings,
     },
 ]
