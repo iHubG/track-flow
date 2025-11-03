@@ -10,7 +10,7 @@ import Notification from '@/components/Notification.vue'
 const route = useRoute()
 
 const showNavbar = computed(() => {
-  return route.path === '/user' || route.path === '/'
+  return route.path === '/user' || route.path === '/' || route.path === '/login' || route.path === '/register'
 })
 </script>
 

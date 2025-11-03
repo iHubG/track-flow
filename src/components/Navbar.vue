@@ -4,7 +4,7 @@ import { ref, computed } from 'vue'
 import Button from '@/components/ui/button/Button.vue'
 
 const route = useRoute()
-const isLoggedIn = ref(true)
+const isLoggedIn = ref(false)
 
 const isLoginPage = computed(() => route.path === '/login')
 const isDashboardPage = computed(() => route.path === '/user')
