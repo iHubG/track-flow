@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { TicketPreview } from '@/types'
-import CardTicket from '@/components/CardTicket.vue'
-import Button from '@/components/ui/button/Button.vue'
-
+import { ref, computed, onMounted } from "vue"
+import type { TicketPreview } from "@/types"
+import CardTicket from "@/components/CardTicket.vue"
+import Button from "@/components/ui/button/Button.vue"
 import {
     Dialog,
     DialogTrigger,
@@ -11,70 +10,61 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog"
 
-import CreateTicket from '@/components/CreateTicket.vue'
-import FilterTicket from '@/components/FilterTicket.vue'
+import CreateTicket from "@/components/CreateTicket.vue"
+import FilterTicket from "@/components/FilterTicket.vue"
 
+// ✅ Toast for feedback
 import { useToast } from "vue-toastification"
 const toast = useToast()
 
+// ✅ Import backend API
+import { getUserTickets } from "@/api/ticket"
+
 const isDialogOpen = ref(false)
+const tickets = ref<TicketPreview[]>([])
+const currentFilter = ref<"open" | "in_progress" | "closed">("open")
 
-const tickets = ref<TicketPreview[]>([
-    {
-        id: 10,
-        title: 'Cannot update profile image',
-        status: 'in_progress',
-        priority: 'medium',
-        created_at: '2025-10-18T09:25:00Z',
-    },
-    {
-        id: 11,
-        title: 'Login not working on mobile',
-        status: 'open',
-        priority: 'high',
-        created_at: '2025-10-19T08:00:00Z',
-    },
-    {
-        id: 12,
-        title: 'Feature request: Dark mode',
-        status: 'closed',
-        priority: 'low',
-        created_at: '2025-10-20T12:30:00Z',
-    },
-])
+// ✅ Fetch user tickets on page load
+onMounted(async () => {
+    try {
+        const response = await getUserTickets()
+        tickets.value = Array.isArray(response)
+            ? response
+            : response.data || []
+    } catch (error: any) {
+        console.error("Failed to load tickets:", error)
+        toast.error("Unable to fetch your tickets.")
+    }
+})
 
-const currentFilter = ref<'open' | 'in_progress' | 'closed'>('open')
-
+// ✅ Computed filters & counts
 const counts = computed(() => ({
-    open: tickets.value.filter(t => t.status === 'open').length,
-    in_progress: tickets.value.filter(t => t.status === 'in_progress').length,
-    closed: tickets.value.filter(t => t.status === 'closed').length,
+    open: tickets.value.filter((t) => t.status === "open").length,
+    in_progress: tickets.value.filter((t) => t.status === "in_progress").length,
+    closed: tickets.value.filter((t) => t.status === "closed").length,
 }))
 
 const filteredTickets = computed(() => {
-    return tickets.value.filter(t => t.status === currentFilter.value)
+    return tickets.value.filter((t) => t.status === currentFilter.value)
 })
 
-
-const handleFilterChange = (filter: 'open' | 'in_progress' | 'closed') => {
+const handleFilterChange = (filter: "open" | "in_progress" | "closed") => {
     currentFilter.value = filter
 }
 
-const handleCreateTicket = (data: { title: string; description: string; priority: TicketPreview['priority'] }) => {
-    const newTicket: TicketPreview = {
-        id: Date.now(),
-        title: data.title,
-        priority: data.priority,
-        status: 'open',
-        created_at: new Date().toISOString(),
-    }
+const handleCreateTicket = (newTicket: TicketPreview) => {
+    console.log("📥 Parent received ticket:", newTicket)
+    console.log("📋 Current tickets before:", tickets.value.length)
 
     tickets.value.unshift(newTicket)
+
+    console.log("📋 Current tickets after:", tickets.value.length)
+    console.log("🎯 New tickets array:", tickets.value)
+
     toast.success("Ticket created successfully!")
     isDialogOpen.value = false
-
 }
 </script>
 
@@ -109,7 +99,7 @@ const handleCreateTicket = (data: { title: string; description: string; priority
             <CardTicket v-for="t in filteredTickets" :key="t.id" :ticket="t" />
         </div>
 
-        <p v-else class="text-center text-gray-500 text-sm mt-6">
+        <p v-else class="max-w-xl text-center text-gray-500 text-sm mt-10">
             No tickets found for this filter.
         </p>
     </section>

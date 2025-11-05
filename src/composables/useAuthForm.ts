@@ -7,6 +7,7 @@ export function useAuthForm(mode: "login" | "register") {
 
   const name = ref("");
   const email = ref("");
+  const remember = ref(false);
   const password = ref("");
   const confirmPassword = ref("");
   const showPassword = ref(false);
@@ -48,12 +49,13 @@ export function useAuthForm(mode: "login" | "register") {
       if (mode === "register") {
         await register(name.value, email.value, password.value);
       } else {
-        await login(email.value, password.value);
+        await login(email.value, password.value, remember.value);
       }
 
       // Reset
       name.value = "";
       email.value = "";
+      remember.value = false;
       password.value = "";
       confirmPassword.value = "";
       errors.value = {};
@@ -66,6 +68,7 @@ export function useAuthForm(mode: "login" | "register") {
   return {
     name,
     email,
+    remember,
     password,
     confirmPassword,
     showPassword,

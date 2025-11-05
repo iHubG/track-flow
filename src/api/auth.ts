@@ -32,13 +32,18 @@ export const registerUser = async (
 };
 
 // 🔹 Login User
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (
+  email: string,
+  password: string,
+  remember = false
+) => {
   try {
     await getCsrfCookie();
 
     const response = await api.post("/api/login", {
       email,
       password,
+      remember,
     });
 
     return response.data;

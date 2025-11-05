@@ -13,6 +13,7 @@ const props = defineProps({
 const {
     name,
     email,
+    remember,
     password,
     confirmPassword,
     showPassword,
@@ -79,8 +80,17 @@ const {
                     </button>
                 </div>
                 <span v-if="errors.confirmPassword" class="text-xs text-red-500 mt-1 px-1">{{ errors.confirmPassword
-                    }}</span>
+                }}</span>
             </div>
+
+            <!-- Show only when logging in -->
+            <div v-if="props.mode === 'login'" class="flex items-center gap-2">
+                <input type="checkbox" id="remember" v-model="remember"
+                    class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500" />
+                <label for="remember" class="text-sm text-gray-700">Remember me</label>
+            </div>
+
+
 
             <Button type="submit"
                 class="cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-md transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"

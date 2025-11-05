@@ -1,11 +1,15 @@
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { loginUser, registerUser, logoutUser, getAuthUser } from "@/api/auth";
 import { useToast } from "vue-toastification";
 
-// Shared state (persists across component instances)
-const user = ref<any>(null);
+const user = ref<any>(JSON.parse(localStorage.getItem("user") || "null"));
 const loading = ref(false);
+
+watch(user, (newVal) => {
+  if (newVal) localStorage.setItem("user", JSON.stringify(newVal));
+  else localStorage.removeItem("user");
+});
 
 export function useAuth() {
   const router = useRouter();
@@ -14,23 +18,25 @@ export function useAuth() {
   const isAuthenticated = computed(() => !!user.value);
 
   // 🔹 Login
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, remember: boolean) => {
     loading.value = true;
     try {
-      const data = await loginUser(email, password);
-      user.value = data.user;
+      await loginUser(email, password, remember);
+      await fetchUser();
 
       toast.success("Logged in successfully!");
 
-      if (data.user.role === "admin") {
-        router.push("/admin/dashboard");
-      } else if (data.user.role === "support") {
-        router.push("/support/dashboard");
-      } else {
-        router.push("/user");
+      const role = user.value?.role;
+      switch (role) {
+        case "admin":
+          router.push("/admin/dashboard");
+          break;
+        case "support":
+          router.push("/support/dashboard");
+          break;
+        default:
+          router.push("/user");
       }
-
-      return data;
     } catch (error: any) {
       toast.error(
         error.response?.data?.message ||
@@ -46,15 +52,11 @@ export function useAuth() {
   const register = async (name: string, email: string, password: string) => {
     loading.value = true;
     try {
-      const data = await registerUser(name, email, password);
-      user.value = data.user;
+      await registerUser(name, email, password);
+      await fetchUser();
 
       toast.success("Account created successfully!");
-
-      // Always redirect to onboarding after registration
       router.push("/onboarding");
-
-      return data;
     } catch (error: any) {
       toast.error(
         error.response?.data?.message ||
@@ -84,7 +86,6 @@ export function useAuth() {
 
   // 🔹 Fetch authenticated user
   const fetchUser = async () => {
-    loading.value = true;
     try {
       const data = await getAuthUser();
       user.value = data;
@@ -92,19 +93,16 @@ export function useAuth() {
     } catch (error: any) {
       user.value = null;
       throw error;
-    } finally {
-      loading.value = false;
     }
   };
 
   // 🔹 Check authentication status
   const checkAuth = async () => {
     if (user.value) return true;
-
     try {
       await fetchUser();
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   };
