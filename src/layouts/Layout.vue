@@ -6,6 +6,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import AppSidebar from "@/components/AppSidebar.vue"
 import AppBreadcrumb from "@/components/AppBreadcrumb.vue"
 import Notification from '@/components/Notification.vue'
+import ProfileAvatar from '@/components/ProfileAvatar.vue'
 
 const route = useRoute()
 
@@ -37,7 +38,11 @@ const showNavbar = computed(() => {
               <SidebarTrigger />
               <AppBreadcrumb />
             </div>
-            <Notification />
+            <div class="flex gap-5 items-center">
+              <ProfileAvatar />
+              <Notification />
+            </div>
+
           </header>
 
           <!-- Main page content -->

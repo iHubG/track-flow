@@ -59,7 +59,8 @@ const userInitials = computed(() => {
       <div v-else class="flex items-center gap-4">
         <!-- ✅ Show only Dashboard button when NOT on the dashboard -->
         <template v-if="!isDashboardPage">
-          <RouterLink to="/user">
+          <RouterLink :to="user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'support' ? '/support/dashboard'
+            : '/user/dashboard'">
             <Button class="bg-emerald-600 hover:bg-emerald-700 text-white">
               Dashboard
             </Button>

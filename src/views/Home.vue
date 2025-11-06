@@ -2,7 +2,7 @@
 import { computed, onMounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 
-const { isAuthenticated, checkAuth } = useAuth()
+const { isAuthenticated, checkAuth, user } = useAuth()
 
 onMounted(async () => {
   await checkAuth()
@@ -43,7 +43,8 @@ const isLoggedIn = computed(() => isAuthenticated.value)
 
         <!-- Show this if logged in -->
         <template v-else>
-          <RouterLink to="/user">
+          <RouterLink :to="user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'support' ? '/support/dashboard'
+            : '/user/dashboard'">
             <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg cursor-pointer">
               Go to Dashboard
             </button>

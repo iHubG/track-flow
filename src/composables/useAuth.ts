@@ -35,7 +35,7 @@ export function useAuth() {
           router.push("/support/dashboard");
           break;
         default:
-          router.push("/user");
+          router.push("/user/dashboard");
       }
     } catch (error: any) {
       toast.error(
@@ -56,7 +56,7 @@ export function useAuth() {
       await fetchUser();
 
       toast.success("Account created successfully!");
-      router.push("/user");
+      router.push("/user/dashboard");
     } catch (error: any) {
       toast.error(
         error.response?.data?.message ||
