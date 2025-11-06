@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TicketPreview } from '@/types'
-import { Clock } from 'lucide-vue-next'
+import { Clock, Trash } from 'lucide-vue-next'
 
 const props = defineProps<{
     ticket: TicketPreview
@@ -17,7 +17,7 @@ const formatDate = (date: string) => {
 
 <template>
     <div
-        class="w-full max-w-xl rounded-xl border bg-white p-4 shadow-sm transition-transform hover:shadow-md hover:-translate-y-0.5">
+        class="group w-full max-w-xl rounded-xl border bg-white p-4 shadow-sm transition-transform hover:shadow-md hover:-translate-y-0.5">
         <!-- Header -->
         <div class="flex justify-between items-start mb-3">
             <div class="flex-1">
@@ -25,14 +25,22 @@ const formatDate = (date: string) => {
                     {{ props.ticket.title }}
                 </h2>
             </div>
-            <span :class="[
-                'px-2 py-0.5 rounded-full text-[11px] font-medium capitalize',
-                props.ticket.status === 'open' && 'bg-green-100 text-green-700',
-                props.ticket.status === 'in_progress' && 'bg-yellow-100 text-yellow-700',
-                props.ticket.status === 'closed' && 'bg-red-100 text-red-700',
-            ]">
-                {{ props.ticket.status.replace('_', ' ') }}
-            </span>
+            <div class="flex items-center gap-2">
+                <span :class="[
+                    'px-2 py-0.5 rounded-full text-[11px] font-medium capitalize',
+                    props.ticket.status === 'open' && 'bg-green-100 text-green-700',
+                    props.ticket.status === 'in_progress' && 'bg-yellow-100 text-yellow-700',
+                    props.ticket.status === 'closed' && 'bg-red-100 text-red-700',
+                ]">
+                    {{ props.ticket.status.replace('_', ' ') }}
+                </span>
+                <!-- Delete button - shows on hover -->
+                <button @click.stop="$emit('delete', props.ticket.id)"
+                    class="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600"
+                    title="Delete ticket">
+                    <Trash class="w-4 h-4" />
+                </button>
+            </div>
         </div>
 
         <!-- Meta Info -->

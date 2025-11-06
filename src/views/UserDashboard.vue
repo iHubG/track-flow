@@ -11,6 +11,16 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 import CreateTicket from "@/components/CreateTicket.vue"
 import FilterTicket from "@/components/FilterTicket.vue"
@@ -20,19 +30,21 @@ import { useToast } from "vue-toastification"
 const toast = useToast()
 
 // ✅ Import backend API
-import { getUserTickets } from "@/api/ticket"
+import { getUserTickets, deleteTicket } from "@/api/ticket"
 
 const isDialogOpen = ref(false)
+const isDeleteDialogOpen = ref(false)
+const ticketToDelete = ref<number | null>(null)
 const tickets = ref<TicketPreview[]>([])
 const currentFilter = ref<"open" | "in_progress" | "closed">("open")
 
 // ✅ Fetch user tickets on page load
 onMounted(async () => {
     try {
-        const response = await getUserTickets()
+        const response = (await getUserTickets()) as any
         tickets.value = Array.isArray(response)
             ? response
-            : response.data || []
+            : response?.data ?? []
     } catch (error: any) {
         console.error("Failed to load tickets:", error)
         toast.error("Unable to fetch your tickets.")
@@ -66,6 +78,29 @@ const handleCreateTicket = (newTicket: TicketPreview) => {
     toast.success("Ticket created successfully!")
     isDialogOpen.value = false
 }
+
+// ✅ Open delete confirmation modal
+const handleDeleteTicket = (ticketId: number) => {
+    ticketToDelete.value = ticketId
+    isDeleteDialogOpen.value = true
+}
+
+// ✅ Confirm deletion
+const confirmDelete = async () => {
+    if (!ticketToDelete.value) return
+
+    try {
+        await deleteTicket(ticketToDelete.value)
+        tickets.value = tickets.value.filter((t) => t.id !== ticketToDelete.value)
+        toast.success("Ticket deleted successfully!")
+    } catch (error: any) {
+        console.error("Failed to delete ticket:", error)
+        toast.error("Unable to delete ticket. Please try again.")
+    } finally {
+        isDeleteDialogOpen.value = false
+        ticketToDelete.value = null
+    }
+}
 </script>
 
 <template>
@@ -96,11 +131,29 @@ const handleCreateTicket = (newTicket: TicketPreview) => {
         </div>
 
         <div v-if="filteredTickets.length" class="grid gap-4">
-            <CardTicket v-for="t in filteredTickets" :key="t.id" :ticket="t" />
+            <CardTicket v-for="t in filteredTickets" :key="t.id" :ticket="t" @delete="handleDeleteTicket" />
         </div>
 
         <p v-else class="max-w-xl text-center text-gray-500 text-sm mt-10">
             No tickets found for this filter.
         </p>
+
+        <!-- ✅ Delete Confirmation Modal -->
+        <AlertDialog v-model:open="isDeleteDialogOpen">
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your ticket.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction @click="confirmDelete" class="bg-red-600 hover:bg-red-700">
+                        Delete
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </section>
 </template>

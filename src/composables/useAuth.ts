@@ -56,7 +56,7 @@ export function useAuth() {
       await fetchUser();
 
       toast.success("Account created successfully!");
-      router.push("/onboarding");
+      router.push("/user");
     } catch (error: any) {
       toast.error(
         error.response?.data?.message ||
@@ -73,13 +73,15 @@ export function useAuth() {
     loading.value = true;
     try {
       await logoutUser();
+    } catch (error: any) {
+      console.error("Logout API failed:", error);
+      // Don't throw - we still want to clear local state
+    } finally {
+      // Always clear user data regardless of API success
       user.value = null;
+      localStorage.removeItem("user");
       toast.success("Logged out successfully!");
       router.push("/login");
-    } catch (error: any) {
-      toast.error("Logout failed. Please try again.");
-      throw error;
-    } finally {
       loading.value = false;
     }
   };
