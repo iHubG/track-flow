@@ -6,7 +6,7 @@ import UserDashboard from "@/views/user/UserDashboard.vue";
 import SupportDashboard from "@/views/support/SupportDashboard.vue";
 import Ticket from "@/views/support/Ticket.vue";
 import User from "@/views/support/User.vue";
-import SupportSettings from "@/views/support/SupportSettings.vue";
+import ProfileSettings from "@/components/ProfileSettings.vue";
 import AdminDashboard from "@/views/admin/AdminDashboard.vue";
 import Login from "@/views/auth/Login.vue";
 import Register from "@/views/auth/Register.vue";
@@ -93,7 +93,7 @@ const routes = [
       {
         path: "/profile-settings",
         name: "Profile Settings",
-        component: SupportSettings,
+        component: ProfileSettings,
         meta: {
           title: "Profile Settings",
           breadcrumb: "Profile Settings",
@@ -185,6 +185,6 @@ router.beforeEach(async (to, _from, next) => {
 router.afterEach((to) => {
   const title = to.meta.title as string;
   if (title) {
-    document.title = `${title} - Your App Name`;
+    document.title = `${title} - TrackFlow`;
   }
 });

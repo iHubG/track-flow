@@ -7,11 +7,25 @@ import AppSidebar from "@/components/AppSidebar.vue"
 import AppBreadcrumb from "@/components/AppBreadcrumb.vue"
 import Notification from '@/components/Notification.vue'
 import ProfileAvatar from '@/components/ProfileAvatar.vue'
+import { useAuth } from '@/composables/useAuth'
 
+const { user } = useAuth();
 const route = useRoute()
 
 const showNavbar = computed(() => {
-  return route.path === '/user' || route.path === '/' || route.path === '/login' || route.path === '/register'
+  // Use route meta if available
+  if (route.meta.layout) {
+    return route.meta.layout === 'navbar'
+  }
+
+  // Otherwise check if path starts with /user or is a public route
+  const path = route.path
+  const publicPaths = ['/', '/login', '/register']
+
+  return publicPaths.includes(path) ||
+    path.startsWith('/user') ||
+    user.value?.role === 'user' ||
+    !user.value
 })
 </script>
 
@@ -25,6 +39,7 @@ const showNavbar = computed(() => {
       </main>
     </div>
 
+    <!-- Layout with Sidebar -->
     <SidebarProvider v-else>
       <div class="flex min-h-screen w-full">
         <!-- Sidebar (fixed left section) -->
@@ -42,7 +57,6 @@ const showNavbar = computed(() => {
               <ProfileAvatar />
               <Notification />
             </div>
-
           </header>
 
           <!-- Main page content -->
@@ -52,6 +66,5 @@ const showNavbar = computed(() => {
         </div>
       </div>
     </SidebarProvider>
-
   </div>
 </template>

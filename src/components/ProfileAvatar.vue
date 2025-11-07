@@ -47,8 +47,10 @@ const userInitials = computed(() => {
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem as="router-link" to="/settings" class="cursor-pointer">
-                Profile Settings
+            <DropdownMenuItem class="cursor-pointer">
+                <RouterLink to="/profile-settings">
+                    Profile Settings
+                </RouterLink>
             </DropdownMenuItem>
 
             <DropdownMenuItem @click="logout" class="cursor-pointer">

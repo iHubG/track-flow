@@ -3,7 +3,6 @@ import {
     Home,
     Ticket,
     Users,
-    Settings,
 } from "lucide-vue-next"
 
 import {
@@ -33,12 +32,6 @@ const items = [
         title: "Users",
         url: "/users",
         icon: Users,
-    },
-
-    {
-        title: "Settings",
-        url: "/profile-settings",
-        icon: Settings,
     },
 ]
 </script>

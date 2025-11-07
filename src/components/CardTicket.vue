@@ -36,7 +36,7 @@ const formatDate = (date: string) => {
                 </span>
                 <!-- Delete button - shows on hover -->
                 <button @click.stop="$emit('delete', props.ticket.id)"
-                    class="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600"
+                    class="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 cursor-pointer"
                     title="Delete ticket">
                     <Trash class="w-4 h-4" />
                 </button>

@@ -18,8 +18,13 @@ const route = useRoute()
 const { isAuthenticated, user, checkAuth, logout } = useAuth()
 
 const isLoginPage = computed(() => route.path === '/login')
-const isDashboardPage = computed(() => route.path === '/user')
 const isLoggedIn = computed(() => isAuthenticated.value)
+
+// ✅ Check if user is on any authenticated user page (dashboard or other pages)
+const isOnUserPages = computed(() => {
+  return route.path.startsWith('/user/') ||
+    route.path === '/profile-settings'
+})
 
 onMounted(async () => {
   await checkAuth()
@@ -57,8 +62,8 @@ const userInitials = computed(() => {
 
       <!-- Authenticated user -->
       <div v-else class="flex items-center gap-4">
-        <!-- ✅ Show only Dashboard button when NOT on the dashboard -->
-        <template v-if="!isDashboardPage">
+        <!-- ✅ Show Dashboard button only when NOT on user pages -->
+        <template v-if="!isOnUserPages">
           <RouterLink :to="user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'support' ? '/support/dashboard'
             : '/user/dashboard'">
             <Button class="bg-emerald-600 hover:bg-emerald-700 text-white">
@@ -67,11 +72,11 @@ const userInitials = computed(() => {
           </RouterLink>
         </template>
 
-        <!-- ✅ Show avatar dropdown only on dashboard page -->
+        <!-- ✅ Show avatar dropdown when on user pages (dashboard, profile-settings, etc.) -->
         <template v-else>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <button class="flex items-center gap-2 focus:outline-none">
+              <button class="flex items-center gap-2 focus:outline-none cursor-pointer">
                 <div
                   class="w-8 h-8 flex items-center justify-center rounded-full bg-emerald-600 text-white font-semibold">
                   {{ userInitials }}
@@ -86,11 +91,13 @@ const userInitials = computed(() => {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem as="router-link" to="/settings">
-                Settings
+              <DropdownMenuItem class="cursor-pointer">
+                <RouterLink to="/user/profile-settings">
+                  Profile Settings
+                </RouterLink>
               </DropdownMenuItem>
 
-              <DropdownMenuItem @click="logout">
+              <DropdownMenuItem @click="logout" class="cursor-pointer">
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
