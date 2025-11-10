@@ -19,11 +19,19 @@ const { isAuthenticated, user, checkAuth, logout } = useAuth()
 
 const isLoginPage = computed(() => route.path === '/login')
 const isLoggedIn = computed(() => isAuthenticated.value)
+const detectedRole = computed(() => user?.value.role === 'admin' ? '/admin' : user?.value.role === 'support' ? '/support'
+  : '/user')
+
+const dashboardPath = computed(() => {
+  if (user?.value.role === 'admin') return '/admin/dashboard'
+  if (user?.value.role === 'support') return '/support/dashboard'
+  return '/user/dashboard'
+})
 
 // ✅ Check if user is on any authenticated user page (dashboard or other pages)
 const isOnUserPages = computed(() => {
   return route.path.startsWith('/user/') ||
-    route.path === '/profile-settings'
+    route.path === `${detectedRole}'/profile-settings'`
 })
 
 onMounted(async () => {
@@ -61,11 +69,11 @@ const userInitials = computed(() => {
       </div>
 
       <!-- Authenticated user -->
-      <div v-else class="flex items-center gap-4">
+      <div v-else class="flex items-center gap-4 lg:gap-6">
         <!-- ✅ Show Dashboard button only when NOT on user pages -->
         <template v-if="!isOnUserPages">
-          <RouterLink :to="user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'support' ? '/support/dashboard'
-            : '/user/dashboard'">
+
+          <RouterLink :to="dashboardPath">
             <Button class="bg-emerald-600 hover:bg-emerald-700 text-white">
               Dashboard
             </Button>
@@ -74,6 +82,11 @@ const userInitials = computed(() => {
 
         <!-- ✅ Show avatar dropdown when on user pages (dashboard, profile-settings, etc.) -->
         <template v-else>
+          <RouterLink :to="dashboardPath" v-if="route.path === `${detectedRole}/profile-settings`">
+            <Button class="bg-emerald-600 hover:bg-emerald-700 text-white">
+              Dashboard
+            </Button>
+          </RouterLink>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <button class="flex items-center gap-2 focus:outline-none cursor-pointer">

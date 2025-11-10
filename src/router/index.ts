@@ -91,7 +91,7 @@ const routes = [
         },
       },
       {
-        path: "/profile-settings",
+        path: "/:role/profile-settings",
         name: "Profile Settings",
         component: ProfileSettings,
         meta: {
@@ -139,7 +139,6 @@ router.beforeEach(async (to, _from, next) => {
   try {
     // Try to get authenticated user
     const user = await getAuthUser();
-
     // If user is authenticated
     if (user) {
       // Redirect to appropriate dashboard if trying to access login/register

@@ -1,113 +1,152 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
 import { useAuth } from '@/composables/useAuth'
+import { useProfile } from "@/composables/useProfile"
+import { OhVueIcon, addIcons } from 'oh-vue-icons'
+import { FaRegularEye, FaRegularEyeSlash } from 'oh-vue-icons/icons'
+
+addIcons(FaRegularEye, FaRegularEyeSlash)
+
 
 const { user } = useAuth()
+const {
+    name,
+    currentPassword,
+    newPassword,
+    showCurrentPassword,
+    showNewPassword,
+    isLoading,
+    errors,
+    successMessage,
+    handleUpdate,
+    validateForm,
+    clearError,
+    resetForm
+} = useProfile()
 
-// Editable fields
-const name = ref(user.value.name)
+// Initialize name from user
+name.value = user.value.name
 const email = ref(user.value.email)
-const password = ref("")
-const notifications = ref(user.value.notifications)
 
 const userInitials = computed(() => {
     if (!user.value?.name) return '?'
     return user.value.name
         .split(' ')
-        .map((n: string) => n[0])
+        .map((n: string) => n)
         .join('')
         .toUpperCase()
 })
 
 const firstUpper = user.value.role.charAt(0).toUpperCase();
 
-const handleSaveProfile = () => {
-    console.log("Profile saved:", { name: name.value, email: email.value })
-    // TODO: send PUT request to backend API
+const handleSaveProfile = async () => {
+    const success = await handleUpdate()
+    if (success) {
+        console.log("✅ Profile updated successfully")
+    }
 }
 
-const handleChangePassword = () => {
-    console.log("Password updated:", password.value)
-    // TODO: send PATCH request to backend API
-}
-
-const handleToggleNotifications = () => {
-    user.value.notifications = notifications.value
-    console.log("Notifications toggled:", notifications.value)
-    // TODO: update notification preference in backend
-}
 </script>
 
 <template>
-    <div class="space-y-8">
+    <div class="py-4 px-6 space-y-4">
         <!-- Header -->
         <div>
             <h2 class="text-xl font-semibold">Personal Settings</h2>
             <p class="text-sm text-gray-500">Manage your profile, password, and preferences</p>
         </div>
 
-        <!-- Profile Info -->
-        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6">
-            <div class="flex flex-col gap-4">
-                <div class="flex items-center gap-2 focus:outline-none cursor-pointer">
-                    <div
-                        class="w-8 h-8 flex items-center justify-center rounded-full bg-emerald-600 text-white font-semibold">
-                        {{ userInitials }}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+            <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6">
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-2 focus:outline-none cursor-pointer">
+                        <div
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-emerald-600 text-white font-semibold">
+                            {{ userInitials }}
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">
+                            {{ user?.name }}
+                        </span>
                     </div>
-                    <span class="hidden sm:inline text-sm font-medium text-gray-700">
-                        {{ user?.name }}
-                    </span>
-
-                </div>
-                <p class="text-sm text-gray-500">Role: {{ firstUpper + user.role.substring(1, user.role.length) }}
-                </p>
-
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                    <input v-model="name" type="text"
-                        class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <p class="text-sm text-gray-500">Role: {{ firstUpper + user.role.substring(1, user.role.length) }}
+                    </p>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input v-model="email" type="email"
-                        class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <div class="flex flex-col gap-4">
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input v-model="email" type="email" disabled
+                            class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <!-- Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input v-model="name" type="text"
+                            class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
                 </div>
-            </div>
 
-            <button @click="handleSaveProfile"
-                class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
-                Save Profile
-            </button>
-        </section>
+                <button @click="handleSaveProfile"
+                    class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                    Save Profile
+                </button>
+            </section>
 
-        <!-- Password Change -->
-        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
-            <h3 class="text-lg font-medium">Change Password</h3>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                <input v-model="password" type="password" placeholder="••••••••"
-                    class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <button @click="handleChangePassword"
-                class="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700">
-                Update Password
-            </button>
-        </section>
+            <!-- Password Change -->
+            <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
+                <h3 class="text-lg font-medium">Change Password</h3>
 
-        <!-- Notifications -->
-        <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
-            <h3 class="text-lg font-medium">Notifications</h3>
-            <div class="flex items-center gap-3">
-                <input id="notifications" type="checkbox" v-model="notifications" @change="handleToggleNotifications"
-                    class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-                <label for="notifications" class="text-sm text-gray-700">
-                    Receive email and in-app notifications
-                </label>
-            </div>
-        </section>
+                <!-- Current Password -->
+                <div class="flex flex-col gap-1">
+                    <label for="currentPassword" class="text-sm font-medium text-gray-700">Current Password</label>
+                    <div class="relative">
+                        <input :type="showCurrentPassword ? 'text' : 'password'" v-model="currentPassword"
+                            id="currentPassword" placeholder="••••••••" :class="[
+                                'w-full py-2 px-3 pr-10 rounded-md border focus:ring-2 focus:outline-none transition-all',
+                                errors.currentPassword ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-emerald-500'
+                            ]" />
+                        <button type="button" @click="showCurrentPassword = !showCurrentPassword"
+                            class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-emerald-600">
+                            <OhVueIcon :name="showCurrentPassword ? 'fa-regular-eye-slash' : 'fa-regular-eye'"
+                                scale="1.2" />
+                        </button>
+                    </div>
+                    <span v-if="errors.currentPassword" class="text-xs text-red-500 mt-1 px-1">{{ errors.currentPassword
+                        }}</span>
+                </div>
+
+                <!-- New Password -->
+                <div class="flex flex-col gap-1">
+                    <label for="newPassword" class="text-sm font-medium text-gray-700">New Password</label>
+                    <div class="relative">
+                        <input :type="showNewPassword ? 'text' : 'password'" v-model="newPassword" id="newPassword"
+                            placeholder="••••••••" :class="[
+                                'w-full py-2 px-3 pr-10 rounded-md border focus:ring-2 focus:outline-none transition-all',
+                                errors.newPassword ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-emerald-500'
+                            ]" />
+                        <button type="button" @click="showNewPassword = !showNewPassword"
+                            class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-emerald-600">
+                            <OhVueIcon :name="showNewPassword ? 'fa-regular-eye-slash' : 'fa-regular-eye'"
+                                scale="1.2" />
+                        </button>
+                    </div>
+                    <span v-if="errors.newPassword" class="text-xs text-red-500 mt-1 px-1">{{ errors.newPassword
+                        }}</span>
+                </div>
+
+                <button @click="handleUpdate" :disabled="isLoading"
+                    class="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 transition-colors">
+                    {{ isLoading ? 'Updating...' : 'Update Password' }}
+                </button>
+
+                <!-- Success message -->
+                <div v-if="successMessage" class="text-green-600 text-sm mt-2">
+                    {{ successMessage }}
+                </div>
+            </section>
+        </div>
     </div>
 </template>
