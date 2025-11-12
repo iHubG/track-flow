@@ -56,9 +56,18 @@ export const loginUser = async (
 // 🔹 Get Authenticated User
 export const getAuthUser = async () => {
   try {
+    // Always ensure CSRF is ready before fetching user
+    await getCsrfCookie();
+
     const response = await api.get("/api/user");
     return response.data;
   } catch (error: any) {
+    // If unauthorized, just return null instead of throwing
+    if (error.response?.status === 401) {
+      console.warn("User not authenticated yet");
+      return null;
+    }
+
     console.error("Get user failed:", error.response?.data || error.message);
     throw error;
   }

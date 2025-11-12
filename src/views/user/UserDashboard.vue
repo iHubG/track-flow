@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
-import type { TicketPreview } from "@/types"
-import CardTicket from "@/components/CardTicket.vue"
-import Button from "@/components/ui/button/Button.vue"
+import { ref, computed, onMounted } from "vue";
+import type { TicketPreview } from "@/types";
+import CardTicket from "@/components/CardTicket.vue";
+import Button from "@/components/ui/button/Button.vue";
 import {
     Dialog,
     DialogTrigger,
@@ -10,7 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,88 +20,70 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import CreateTicket from "@/components/CreateTicket.vue";
+import FilterTicket from "@/components/FilterTicket.vue";
+import { useToast } from "vue-toastification";
+import { deleteTicket } from "@/api/ticket";
+import { useTickets } from "@/composables/useTicket"; // ✅ add this
 
-import CreateTicket from "@/components/CreateTicket.vue"
-import FilterTicket from "@/components/FilterTicket.vue"
+const toast = useToast();
 
-// ✅ Toast for feedback
-import { useToast } from "vue-toastification"
-const toast = useToast()
+const isDialogOpen = ref(false);
+const isDeleteDialogOpen = ref(false);
+const ticketToDelete = ref<number | null>(null);
+const currentFilter = ref<"open" | "in_progress" | "closed">("open");
 
-// ✅ Import backend API
-import { getUserTickets, deleteTicket } from "@/api/ticket"
+// ✅ use the composable
+const { tickets, fetchTickets, loading } = useTickets();
 
-const isDialogOpen = ref(false)
-const isDeleteDialogOpen = ref(false)
-const ticketToDelete = ref<number | null>(null)
-const tickets = ref<TicketPreview[]>([])
-const currentFilter = ref<"open" | "in_progress" | "closed">("open")
-
-// ✅ Fetch user tickets on page load
-onMounted(async () => {
-    try {
-        const response = (await getUserTickets()) as any
-        tickets.value = Array.isArray(response)
-            ? response
-            : response?.data ?? []
-    } catch (error: any) {
-        console.error("Failed to load tickets:", error)
-        toast.error("Unable to fetch your tickets.")
-    }
-})
+onMounted(fetchTickets);
 
 // ✅ Computed filters & counts
 const counts = computed(() => ({
     open: tickets.value.filter((t) => t.status === "open").length,
     in_progress: tickets.value.filter((t) => t.status === "in_progress").length,
     closed: tickets.value.filter((t) => t.status === "closed").length,
-}))
+}));
 
 const filteredTickets = computed(() => {
-    return tickets.value.filter((t) => t.status === currentFilter.value)
-})
+    return tickets.value.filter((t) => t.status === currentFilter.value);
+});
 
 const handleFilterChange = (filter: "open" | "in_progress" | "closed") => {
-    currentFilter.value = filter
-}
+    currentFilter.value = filter;
+};
 
 const handleCreateTicket = (newTicket: TicketPreview) => {
-    console.log("📥 Parent received ticket:", newTicket)
-    console.log("📋 Current tickets before:", tickets.value.length)
-
-    tickets.value.unshift(newTicket)
-
-    console.log("📋 Current tickets after:", tickets.value.length)
-    console.log("🎯 New tickets array:", tickets.value)
-
-    toast.success("Ticket created successfully!")
-    isDialogOpen.value = false
-}
+    tickets.value.unshift(newTicket);
+    toast.success("Ticket created successfully!");
+    isDialogOpen.value = false;
+};
 
 // ✅ Open delete confirmation modal
 const handleDeleteTicket = (ticketId: number) => {
-    ticketToDelete.value = ticketId
-    isDeleteDialogOpen.value = true
-}
+    ticketToDelete.value = ticketId;
+    isDeleteDialogOpen.value = true;
+};
 
 // ✅ Confirm deletion
 const confirmDelete = async () => {
-    if (!ticketToDelete.value) return
+    if (!ticketToDelete.value) return;
 
     try {
-        await deleteTicket(ticketToDelete.value)
-        tickets.value = tickets.value.filter((t) => t.id !== ticketToDelete.value)
-        toast.success("Ticket deleted successfully!")
+        await deleteTicket(ticketToDelete.value);
+        tickets.value = tickets.value.filter((t) => t.id !== ticketToDelete.value);
+        toast.success("Ticket deleted successfully!");
     } catch (error: any) {
-        console.error("Failed to delete ticket:", error)
-        toast.error("Unable to delete ticket. Please try again.")
+        console.error("Failed to delete ticket:", error);
+        toast.error("Unable to delete ticket. Please try again.");
     } finally {
-        isDeleteDialogOpen.value = false
-        ticketToDelete.value = null
+        isDeleteDialogOpen.value = false;
+        ticketToDelete.value = null;
     }
-}
+};
 </script>
+
 
 <template>
     <section class="py-4 px-6">
@@ -130,10 +112,10 @@ const confirmDelete = async () => {
             </Dialog>
         </div>
 
-        <div v-if="filteredTickets.length" class="grid gap-4">
+        <div v-if="loading" class="max-w-xl text-center text-gray-500 text-sm mt-10">Loading tickets...</div>
+        <div v-else-if="filteredTickets.length" class="grid gap-4">
             <CardTicket v-for="t in filteredTickets" :key="t.id" :ticket="t" @delete="handleDeleteTicket" />
         </div>
-
         <p v-else class="max-w-xl text-center text-gray-500 text-sm mt-10">
             No tickets found for this filter.
         </p>

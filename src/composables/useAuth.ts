@@ -3,6 +3,8 @@ import { useRouter } from "vue-router";
 import { loginUser, registerUser, logoutUser, getAuthUser } from "@/api/auth";
 import { useToast } from "vue-toastification";
 
+let hasFetchedUser = false;
+
 const user = ref<any>(JSON.parse(localStorage.getItem("user") || "null"));
 const loading = ref(false);
 
@@ -86,14 +88,24 @@ export function useAuth() {
     }
   };
 
-  // 🔹 Fetch authenticated user
   const fetchUser = async () => {
+    // ✅ Only skip if we already fetched successfully
+    if (hasFetchedUser && user.value) return user.value;
+
+    hasFetchedUser = true;
+
     try {
       const data = await getAuthUser();
       user.value = data;
       return data;
     } catch (error: any) {
-      user.value = null;
+      if (error.response?.status === 401) {
+        console.warn("User not authenticated yet — skipping");
+        user.value = null;
+        hasFetchedUser = false;
+        return null;
+      }
+      console.error("Fetch user failed:", error);
       throw error;
     }
   };

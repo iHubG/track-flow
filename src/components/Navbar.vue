@@ -105,7 +105,7 @@ const userInitials = computed(() => {
               <DropdownMenuSeparator />
 
               <DropdownMenuItem class="cursor-pointer">
-                <RouterLink to="/user/profile-settings">
+                <RouterLink to="/user/profile-settings" class="w-full h-full">
                   Profile Settings
                 </RouterLink>
               </DropdownMenuItem>

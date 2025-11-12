@@ -10,7 +10,7 @@ import ProfileSettings from "@/components/ProfileSettings.vue";
 import AdminDashboard from "@/views/admin/AdminDashboard.vue";
 import Login from "@/views/auth/Login.vue";
 import Register from "@/views/auth/Register.vue";
-import { getAuthUser } from "@/api/auth";
+import { useAuth } from "@/composables/useAuth";
 
 const routes = [
   {
@@ -130,53 +130,47 @@ export const router = createRouter({
   routes,
 });
 
-// Navigation Guard
 router.beforeEach(async (to, _from, next) => {
+  const { user, fetchUser } = useAuth();
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const guestOnly = to.matched.some((record) => record.meta.guestOnly);
   const requiredRoles = to.meta.roles as string[] | undefined;
 
+  let currentUser = user.value;
+
   try {
-    // Try to get authenticated user
-    const user = await getAuthUser();
-    // If user is authenticated
-    if (user) {
-      // Redirect to appropriate dashboard if trying to access login/register
+    // Only fetch if we don’t already have a user loaded
+    if (!currentUser) {
+      currentUser = await fetchUser();
+    }
+
+    if (currentUser) {
+      // Redirect guest-only pages
       if (guestOnly) {
-        // Redirect based on role
-        if (user.role === "admin") {
-          return next({ name: "AdminDashboard" });
-        } else if (user.role === "support") {
-          return next({ name: "SupportDashboard" });
-        } else {
-          return next({ name: "UserDashboard" });
-        }
+        const role = currentUser.role;
+        if (role === "admin") return next({ name: "AdminDashboard" });
+        if (role === "support") return next({ name: "SupportDashboard" });
+        return next({ name: "UserDashboard" });
       }
 
       // Check role-based access
-      if (requiredRoles && !requiredRoles.includes(user.role)) {
-        // User doesn't have required role, redirect to their dashboard
-        if (user.role === "admin") {
-          return next({ name: "AdminDashboard" });
-        } else if (user.role === "support") {
-          return next({ name: "SupportDashboard" });
-        } else {
-          return next({ name: "UserDashboard" });
-        }
+      if (requiredRoles && !requiredRoles.includes(currentUser.role)) {
+        const role = currentUser.role;
+        if (role === "admin") return next({ name: "AdminDashboard" });
+        if (role === "support") return next({ name: "SupportDashboard" });
+        return next({ name: "UserDashboard" });
       }
 
-      // User has access
+      // ✅ User has access
       return next();
     }
   } catch (error) {
-    // User is not authenticated
+    // Not authenticated
     if (requiresAuth) {
-      // Redirect to login if trying to access protected route
       return next({ name: "Login", query: { redirect: to.fullPath } });
     }
   }
 
-  // Allow navigation
   next();
 });
 
