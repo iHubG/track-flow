@@ -16,3 +16,29 @@ export interface CreateTicketPayload {
   description: string;
   priority: TicketPriority;
 }
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Update profile request payload
+export interface UpdateProfilePayload {
+  name: string;
+}
+
+// Change password payload
+export interface ChangePasswordPayload {
+  current_password: string;
+  new_password: string;
+  new_password_confirmation: string;
+}
+
+// Generic API response with user data
+export interface ApiResponse<T> {
+  message: string;
+  user?: T;
+}

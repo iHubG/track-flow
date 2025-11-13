@@ -13,6 +13,11 @@ import {
 
 const { isAuthenticated, user, checkAuth, logout } = useAuth()
 const isLoggedIn = computed(() => isAuthenticated.value)
+const role = computed(() => {
+    if (user?.value.role === 'admin') return 'admin'
+    if (user?.value.role === 'support') return 'support'
+    return 'user'
+})
 
 onMounted(async () => {
     await checkAuth()
@@ -48,7 +53,7 @@ const userInitials = computed(() => {
             <DropdownMenuSeparator />
 
             <DropdownMenuItem class="cursor-pointer">
-                <RouterLink to="/profile-settings">
+                <RouterLink :to="`/${role}/profile-settings`" class="w-full h-full">
                     Profile Settings
                 </RouterLink>
             </DropdownMenuItem>

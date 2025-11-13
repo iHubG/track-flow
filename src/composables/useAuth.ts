@@ -90,9 +90,9 @@ export function useAuth() {
 
   const fetchUser = async () => {
     // ✅ Only skip if we already fetched successfully
-    if (hasFetchedUser && user.value) return user.value;
+    // if (hasFetchedUser && user.value) return user.value;
 
-    hasFetchedUser = true;
+    // hasFetchedUser = true;
 
     try {
       const data = await getAuthUser();
