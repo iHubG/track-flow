@@ -135,11 +135,17 @@ router.beforeEach(async (to, _from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const guestOnly = to.matched.some((record) => record.meta.guestOnly);
   const requiredRoles = to.meta.roles as string[] | undefined;
+  const paths = ["/", "/register", "/login"];
 
   let currentUser = user.value;
 
   try {
     // Only fetch if we don’t already have a user loaded
+
+    if (paths.includes(to.path)) {
+      return next();
+    }
+
     if (!currentUser) {
       currentUser = await fetchUser();
     }

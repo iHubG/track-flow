@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 
-const { isAuthenticated, checkAuth, user } = useAuth()
-
-onMounted(async () => {
-  await checkAuth()
-})
+const { isAuthenticated, user } = useAuth()
 
 const isLoggedIn = computed(() => isAuthenticated.value)
 </script>

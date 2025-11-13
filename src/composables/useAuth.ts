@@ -82,8 +82,8 @@ export function useAuth() {
       // Always clear user data regardless of API success
       user.value = null;
       localStorage.removeItem("user");
-      toast.success("Logged out successfully!");
       router.push("/login");
+      toast.success("Logged out successfully!");
       loading.value = false;
     }
   };

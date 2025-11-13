@@ -30,33 +30,33 @@ const {
             {{ props.mode === 'register' ? 'Create an Account' : 'Login' }}
         </h1>
 
-        <form @submit.prevent="handleSubmit" class="flex flex-col gap-6">
+        <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
             <div v-if="props.mode === 'register'" class="flex flex-col gap-1">
                 <label for="name" class="text-sm font-medium text-gray-700">Name</label>
-                <input v-model="name" id="name" placeholder="John Doe" :class="[
+                <input v-model="name" name="name" id="name" placeholder="John Doe" :class="[
                     'py-2 px-3 rounded-md border focus:ring-2 focus:outline-none transition-all',
                     errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-emerald-500'
-                ]" />
+                ]" autocomplete="off" />
                 <span v-if="errors.name" class="text-xs text-red-500 mt-1 px-1">{{ errors.name }}</span>
             </div>
 
             <div class="flex flex-col gap-1">
                 <label for="email" class="text-sm font-medium text-gray-700">Email</label>
-                <input v-model="email" id="email" type="email" placeholder="hello@example.com" :class="[
+                <input v-model="email" name="email" id="email" type="email" placeholder="hello@example.com" :class="[
                     'py-2 px-3 rounded-md border focus:ring-2 focus:outline-none transition-all',
                     errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-emerald-500'
-                ]" />
+                ]" autocomplete="off" />
                 <span v-if="errors.email" class="text-xs text-red-500 mt-1 px-1">{{ errors.email }}</span>
             </div>
 
             <div class="flex flex-col gap-1">
                 <label for="password" class="text-sm font-medium text-gray-700">Password</label>
                 <div class="relative">
-                    <input :type="showPassword ? 'text' : 'password'" v-model="password" id="password"
+                    <input :type="showPassword ? 'text' : 'password'" v-model="password" id="password" name="password"
                         placeholder="••••••••" :class="[
                             'w-full py-2 px-3 pr-10 rounded-md border focus:ring-2 focus:outline-none transition-all',
                             errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-emerald-500'
-                        ]" />
+                        ]" autocomplete="off" />
                     <button type="button" @click="showPassword = !showPassword"
                         class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-emerald-600">
                         <OhVueIcon :name="showPassword ? 'fa-regular-eye-slash' : 'fa-regular-eye'" scale="1.2" />
@@ -69,10 +69,10 @@ const {
                 <label for="confirmPassword" class="text-sm font-medium text-gray-700">Confirm Password</label>
                 <div class="relative">
                     <input :type="showConfirmPassword ? 'text' : 'password'" v-model="confirmPassword"
-                        placeholder="••••••••" :class="[
+                        id="confirmPassword" name="confirmPassword" placeholder="••••••••" :class="[
                             'w-full py-2 px-3 pr-10 rounded-md border focus:ring-2 focus:outline-none transition-all',
                             errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-emerald-500'
-                        ]" />
+                        ]" autocomplete="off" />
                     <button type="button" @click="showConfirmPassword = !showConfirmPassword"
                         class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-emerald-600">
                         <OhVueIcon :name="showConfirmPassword ? 'fa-regular-eye-slash' : 'fa-regular-eye'"
@@ -80,7 +80,7 @@ const {
                     </button>
                 </div>
                 <span v-if="errors.confirmPassword" class="text-xs text-red-500 mt-1 px-1">{{ errors.confirmPassword
-                }}</span>
+                    }}</span>
             </div>
 
             <!-- Show only when logging in -->
