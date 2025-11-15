@@ -35,7 +35,13 @@ const isOnUserPages = computed(() => {
 })
 
 onMounted(async () => {
-  await checkAuth()
+  if (user.value || localStorage.getItem('user')) {
+    checkAuth().catch(() => {
+      // Failed to verify, clear state
+      user.value = null;
+      localStorage.removeItem('user');
+    });
+  }
 })
 
 const userInitials = computed(() => {

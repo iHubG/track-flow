@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
+import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useProfile } from "@/composables/useProfile"
 import { OhVueIcon, addIcons } from 'oh-vue-icons'
@@ -21,6 +22,7 @@ addIcons(FaRegularEye, FaRegularEyeSlash)
 
 const { user, fetchUser } = useAuth()
 const toast = useToast();
+const router = useRouter();
 
 const {
     name,
@@ -78,8 +80,7 @@ const handleConfirmDelete = async () => {
     const success = await handleDeleteAccount()
     if (success) {
         toast.success("Account deleted successfully");
-        // Redirect to login or home page
-        // router.push('/login')
+        router.push('/login')
     } else {
         toast.error("Failed to delete account");
     }
@@ -179,7 +180,7 @@ const handleConfirmDelete = async () => {
                         </button>
                     </div>
                     <span v-if="errors.new_password" class="text-xs text-red-500 mt-1 px-1">{{ errors.new_password
-                    }}</span>
+                        }}</span>
                 </div>
 
                 <!-- New Password Confirmation -->

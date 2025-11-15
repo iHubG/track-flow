@@ -6,6 +6,8 @@ import {
   deleteUserAccount,
 } from "@/api/profile";
 import type { UpdateProfilePayload, ChangePasswordPayload } from "@/types";
+import { useAuth } from "@/composables/useAuth";
+import { useTickets } from "@/composables/useTicket";
 
 interface ProfileErrors {
   name?: string;
@@ -188,6 +190,25 @@ export function useProfile() {
 
     try {
       await deleteUserAccount();
+
+      // ⚠️ FIX: Clear all user data and session
+      const { user } = useAuth(); // Import useAuth
+      const { clearTickets } = useTickets(); // Import useTickets
+
+      // Clear user state
+      user.value = null;
+      localStorage.removeItem("user");
+
+      // Clear tickets cache
+      clearTickets();
+
+      // Clear Laravel session cookies
+      ["XSRF-TOKEN", "laravel_session"].forEach((name) => {
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=localhost`;
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=127.0.0.1`;
+      });
+
       return true;
     } catch (err) {
       const errorMessage =
@@ -199,7 +220,6 @@ export function useProfile() {
       isLoadingDelete.value = false;
     }
   };
-
   return {
     // Profile form fields
     name,
