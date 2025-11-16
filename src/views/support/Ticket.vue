@@ -4,7 +4,7 @@ import { SquarePen, Trash, MoreHorizontal, Clock, CheckCircle, XCircle, ChevronD
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import type { TicketPreview } from "@/types";
+import type { TicketPreview, TicketStatus } from "@/types";
 import { useToast } from "vue-toastification"
 import {
     Dialog,
@@ -21,14 +21,28 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import CreateTicket from "@/components/CreateTicket.vue"
 import { useTickets } from "@/composables/useTicket"
+import { deleteTicket } from "@/api/ticket";
+import { updateTicket } from "@/api/ticket";
 
 const toast = useToast();
 const isDialogOpen = ref(false)
+const isDeleteDialogOpen = ref(false);
+const ticketToDelete = ref<number | null>(null);
 
-const { tickets, fetchTickets, loading } = useTickets();
+const { tickets, fetchTickets, loading } = useTickets(true);
 
 const statuses = [
     { label: "Open", value: "open", icon: Clock },
@@ -64,21 +78,50 @@ const statusColor = (status: string) => {
 
 
 
-const updateStatus = async (ticket: any, newStatus: string) => {
-    //   try {
-    //     // update immediately for snappy UI
-    //     ticket.status = newStatus;
+const updateStatus = async (ticket: TicketPreview, newStatus: TicketStatus) => {
+    try {
+        // Send request to backend
+        await updateTicket(ticket.id, {
+            status: newStatus,
+        });
 
-    //     // send request to backend
-    //     await axios.put(`/api/tickets/${ticket.id}/status`, {
-    //       status: newStatus,
-    //     });
+        // Update the ticket in the array after successful API call
+        const ticketIndex = tickets.value.findIndex((t) => t.id === ticket.id);
+        if (ticketIndex !== -1 && tickets.value[ticketIndex]) {
+            tickets.value[ticketIndex].status = newStatus;
+        }
 
-    //     // optional: toast
-    //     toast.success("Status updated!");
-    //   } catch (e) {
-    //     toast.error("Failed to update status.");
-    //   }
+        // Show success toast
+        toast.success("Status updated successfully!");
+    } catch (error: any) {
+        console.error("Failed to update status:", error);
+
+        // Show error toast
+        toast.error("Failed to update status. Please try again.");
+    }
+};
+
+// ✅ Open delete confirmation modal
+const handleDeleteTicket = (ticketId: number) => {
+    ticketToDelete.value = ticketId;
+    isDeleteDialogOpen.value = true;
+};
+
+// ✅ Confirm deletion
+const confirmDelete = async () => {
+    if (!ticketToDelete.value) return;
+
+    try {
+        await deleteTicket(ticketToDelete.value);
+        tickets.value = tickets.value.filter((t) => t.id !== ticketToDelete.value);
+        toast.success("Ticket deleted successfully!");
+    } catch (error: any) {
+        console.error("Failed to delete ticket:", error);
+        toast.error("Unable to delete ticket. Please try again.");
+    } finally {
+        isDeleteDialogOpen.value = false;
+        ticketToDelete.value = null;
+    }
 };
 </script>
 
@@ -144,7 +187,7 @@ const updateStatus = async (ticket: any, newStatus: string) => {
 
                                         <DropdownMenuContent class="w-36">
                                             <DropdownMenuItem v-for="s in statuses" :key="s.value"
-                                                @click="updateStatus(ticket, s.value)">
+                                                @click="updateStatus(ticket, s.value as TicketStatus)">
                                                 <component :is="s.icon" class="mr-2 h-4 w-4" />
                                                 <span class="capitalize">{{ s.label }}</span>
                                             </DropdownMenuItem>
@@ -172,7 +215,7 @@ const updateStatus = async (ticket: any, newStatus: string) => {
                                             </Button>
                                         </DropdownMenuTrigger>
 
-                                        <DropdownMenuContent align="end" class="w-40">
+                                        <DropdownMenuContent class="w-40 mr-5">
                                             <DropdownMenuItem>
                                                 <SquarePen class="mr-2 h-4 w-4" />
                                                 <span>Edit</span>
@@ -180,7 +223,7 @@ const updateStatus = async (ticket: any, newStatus: string) => {
 
                                             <DropdownMenuSeparator />
 
-                                            <DropdownMenuItem>
+                                            <DropdownMenuItem @click="handleDeleteTicket(ticket.id)">
                                                 <Trash class="mr-2 h-4 w-4" />
                                                 <span>Delete</span>
                                             </DropdownMenuItem>
@@ -190,9 +233,29 @@ const updateStatus = async (ticket: any, newStatus: string) => {
 
                             </tr>
                         </tbody>
+
+
                     </table>
                 </div>
             </CardContent>
         </Card>
+
+        <!-- ✅ Delete Confirmation Modal -->
+        <AlertDialog v-model:open="isDeleteDialogOpen">
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your ticket.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction @click="confirmDelete" class="bg-red-600 hover:bg-red-700">
+                        Delete
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </div>
 </template>

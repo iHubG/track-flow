@@ -17,6 +17,13 @@ export interface CreateTicketPayload {
   priority: TicketPriority;
 }
 
+export interface UpdateTicketPayload {
+  title?: string;
+  description?: string;
+  priority?: TicketPriority;
+  status?: TicketStatus;
+}
+
 export interface User {
   id: number;
   name: string;

@@ -1,9 +1,19 @@
 import api from "./axios";
-import type { TicketPreview, CreateTicketPayload } from "@/types";
+import type {
+  TicketPreview,
+  CreateTicketPayload,
+  UpdateTicketPayload,
+} from "@/types";
 
 // 🔹 Get all tickets for the logged-in user
 export const getUserTickets = async (): Promise<TicketPreview[]> => {
   const response = await api.get<TicketPreview[]>("/api/tickets");
+  return response.data;
+};
+
+// 🔹 Get ALL tickets (for support dashboard/admin)
+export const getAllTickets = async (): Promise<TicketPreview[]> => {
+  const response = await api.get<TicketPreview[]>("/api/tickets/all");
   return response.data;
 };
 
@@ -21,18 +31,17 @@ export const createTicket = async (
   return response.data;
 };
 
-// 🔹 Update a ticket (optional - for editing tickets)
+// 🔹 Update a ticket status
 export const updateTicket = async (
   ticketId: number,
-  payload: Partial<CreateTicketPayload>
+  payload: UpdateTicketPayload
 ): Promise<TicketPreview> => {
   const response = await api.put<TicketPreview>(
-    `/api/tickets/${ticketId}`,
+    `/api/tickets/${ticketId}/status`,
     payload
   );
   return response.data;
 };
-
 // 🔹 Delete a ticket by ID
 export const deleteTicket = async (
   ticketId: number
