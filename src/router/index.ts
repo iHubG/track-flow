@@ -92,7 +92,7 @@ const routes = [
       },
 
       {
-        path: "users",
+        path: "manage-users",
         name: "Manage Users",
         component: User,
         meta: {
