@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import { SquarePen, Trash, MoreHorizontal, Clock, CheckCircle, XCircle, ChevronDown } from "lucide-vue-next"
+import { ref, onMounted, computed, watch } from "vue"
+import { Trash, MoreHorizontal, Clock, CheckCircle, XCircle, ChevronDown } from "lucide-vue-next"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -19,20 +19,11 @@ import {
     DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 import CreateTicket from "@/components/CreateTicket.vue"
+import DeleteDialog from "@/components/DeleteConfirmationModal.vue"
+import FilterTickets from "@/components/FilterTickets.vue"
 import { useTickets } from "@/composables/useTicket"
 import { deleteTicket } from "@/api/ticket";
 import { updateTicket } from "@/api/ticket";
@@ -51,6 +42,48 @@ const statuses = [
 ];
 
 onMounted(fetchTickets);
+
+// ------------------------------
+// Ticket Filters (Status, Priority, Search)
+// ------------------------------
+const filterStatus = ref("all");
+const filterPriority = ref("all");
+const filterSearch = ref("");
+const debouncedSearch = ref("");
+const messageResult = ref("");
+
+let timeout: number;
+
+watch(filterSearch, (val) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        debouncedSearch.value = val;
+    }, 300); // 300ms debounce
+});
+
+const filteredTickets = computed(() => {
+    const results = tickets.value.filter((t) => {
+        const statusMatch =
+            filterStatus.value === "all" || t.status === filterStatus.value;
+
+        const priorityMatch =
+            filterPriority.value === "all" || t.priority === filterPriority.value;
+
+        const searchMatch =
+            !debouncedSearch.value ||
+            t.title.toLowerCase().includes(debouncedSearch.value.toLowerCase()) ||
+            t.description.toLowerCase().includes(debouncedSearch.value.toLowerCase());
+
+        return statusMatch && priorityMatch && searchMatch;
+    });
+
+    messageResult.value =
+        results.length === 0 ? "No tickets found matching your filters." : "";
+
+    return results;
+});
+
+
 
 const handleCreateTicket = (newTicket: TicketPreview) => {
     tickets.value.unshift(newTicket);
@@ -76,38 +109,29 @@ const statusColor = (status: string) => {
     }
 };
 
-
-
 const updateStatus = async (ticket: TicketPreview, newStatus: TicketStatus) => {
     try {
-        // Send request to backend
         await updateTicket(ticket.id, {
             status: newStatus,
         });
 
-        // Update the ticket in the array after successful API call
         const ticketIndex = tickets.value.findIndex((t) => t.id === ticket.id);
         if (ticketIndex !== -1 && tickets.value[ticketIndex]) {
             tickets.value[ticketIndex].status = newStatus;
         }
 
-        // Show success toast
         toast.success("Status updated successfully!");
     } catch (error: any) {
         console.error("Failed to update status:", error);
-
-        // Show error toast
         toast.error("Failed to update status. Please try again.");
     }
 };
 
-// ✅ Open delete confirmation modal
 const handleDeleteTicket = (ticketId: number) => {
     ticketToDelete.value = ticketId;
     isDeleteDialogOpen.value = true;
 };
 
-// ✅ Confirm deletion
 const confirmDelete = async () => {
     if (!ticketToDelete.value) return;
 
@@ -128,7 +152,7 @@ const confirmDelete = async () => {
 <template>
     <div class="space-y-6">
         <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-semibold tracking-tight">Tickets</h1>
+            <h1 class="text-2xl font-bold tracking-tight">Tickets</h1>
 
             <Dialog v-model:open="isDialogOpen">
                 <DialogTrigger asChild>
@@ -151,8 +175,10 @@ const confirmDelete = async () => {
         <div v-if="loading" class="text-center text-gray-500 text-sm mt-10 lg:mt-20">Loading tickets...</div>
 
         <Card v-else>
-            <CardHeader>
+            <CardHeader class="flex items-center justify-between">
                 <CardTitle>All Tickets</CardTitle>
+                <FilterTickets @update:status="filterStatus = $event" @update:priority="filterPriority = $event"
+                    @update:search="filterSearch = $event" />
             </CardHeader>
             <CardContent>
                 <div class="overflow-x-auto">
@@ -161,6 +187,7 @@ const confirmDelete = async () => {
                             <tr class="border-b text-gray-500">
                                 <th class="py-2 px-3">Ticket ID</th>
                                 <th class="py-2 px-3">Title</th>
+                                <th class="py-2 px-3">Description</th>
                                 <th class="py-2 px-3">Status</th>
                                 <th class="py-2 px-3">Priority</th>
                                 <th class="py-2 px-3">Created At</th>
@@ -168,9 +195,15 @@ const confirmDelete = async () => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="ticket in tickets" :key="ticket.id" class="border-b hover:bg-gray-50 transition">
+
+                            <tr v-for="ticket in filteredTickets" :key="ticket.id"
+                                class="border-b hover:bg-gray-50 transition">
                                 <td class="py-2 px-3 font-medium text-gray-800">{{ ticket.id }}</td>
                                 <td class="py-2 px-3">{{ ticket.title }}</td>
+                                <td class="py-2 px-3 max-w-[200px] truncate" :title="ticket.description">
+                                    {{ ticket.description }}
+                                </td>
+
                                 <td class="py-2 px-3">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger as-child>
@@ -187,6 +220,7 @@ const confirmDelete = async () => {
 
                                         <DropdownMenuContent class="w-36">
                                             <DropdownMenuItem v-for="s in statuses" :key="s.value"
+                                                class="cursor-pointer"
                                                 @click="updateStatus(ticket, s.value as TicketStatus)">
                                                 <component :is="s.icon" class="mr-2 h-4 w-4" />
                                                 <span class="capitalize">{{ s.label }}</span>
@@ -195,7 +229,7 @@ const confirmDelete = async () => {
                                     </DropdownMenu>
                                 </td>
 
-                                <td class="py-2 px-3">
+                                <td class="py-3 px-4">
                                     <Badge :variant="ticket.priority === 'high'
                                         ? 'destructive'
                                         : ticket.priority === 'medium'
@@ -216,46 +250,25 @@ const confirmDelete = async () => {
                                         </DropdownMenuTrigger>
 
                                         <DropdownMenuContent class="w-40 mr-5">
-                                            <DropdownMenuItem>
-                                                <SquarePen class="mr-2 h-4 w-4" />
-                                                <span>Edit</span>
-                                            </DropdownMenuItem>
-
-                                            <DropdownMenuSeparator />
-
-                                            <DropdownMenuItem @click="handleDeleteTicket(ticket.id)">
+                                            <DropdownMenuItem @click="handleDeleteTicket(ticket.id)"
+                                                class="cursor-pointer">
                                                 <Trash class="mr-2 h-4 w-4" />
                                                 <span>Delete</span>
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </td>
-
                             </tr>
                         </tbody>
-
-
                     </table>
+                    <div v-if="messageResult" class="text-center text-gray-500 pt-10 pb-8 text-sm w-full">
+                        {{ messageResult }}
+                    </div>
                 </div>
             </CardContent>
         </Card>
 
-        <!-- ✅ Delete Confirmation Modal -->
-        <AlertDialog v-model:open="isDeleteDialogOpen">
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete your ticket.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction @click="confirmDelete" class="bg-red-600 hover:bg-red-700">
-                        Delete
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+        <DeleteDialog v-model="isDeleteDialogOpen" description="This will permanently delete your ticket."
+            @confirm="confirmDelete" />
     </div>
 </template>

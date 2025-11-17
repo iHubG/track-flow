@@ -6,6 +6,7 @@ export interface TicketPreview {
   data: TicketPreview;
   id: number;
   title: string;
+  description: string;
   status: TicketStatus;
   priority: TicketPriority;
   created_at: string;
