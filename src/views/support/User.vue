@@ -151,7 +151,7 @@ const confirmDelete = async () => {
     <div class="space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold">Manage Users</h2>
+            <h2 class="text-xl font-medium">Manage Users</h2>
             <Button>
                 Create New User
             </Button>
@@ -162,7 +162,7 @@ const confirmDelete = async () => {
 
         <Card v-else>
             <CardHeader class="flex items-center justify-between">
-                <CardTitle>All Users</CardTitle>
+                <CardTitle class="text-lg">All Users</CardTitle>
                 <FilterUsers @update:status="filterStatus = $event" @update:role="filterRole = $event"
                     @update:search="filterSearch = $event" />
             </CardHeader>

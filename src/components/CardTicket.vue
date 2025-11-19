@@ -21,6 +21,9 @@ const formatDate = (date: string) => {
         <!-- Header -->
         <div class="flex justify-between items-start mb-3">
             <div class="flex-1">
+                <div class="text-xs font-mono text-gray-500 mb-1">
+                    {{ props.ticket.ticket_id }}
+                </div>
                 <h2 class="text-base font-semibold line-clamp-2 text-gray-800" :title="props.ticket.title">
                     {{ props.ticket.title }}
                 </h2>

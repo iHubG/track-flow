@@ -152,7 +152,7 @@ const confirmDelete = async () => {
 <template>
     <div class="space-y-6">
         <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-tight">Tickets</h1>
+            <h1 class="text-xl font-medium tracking-tight">Tickets</h1>
 
             <Dialog v-model:open="isDialogOpen">
                 <DialogTrigger asChild>
@@ -176,7 +176,7 @@ const confirmDelete = async () => {
 
         <Card v-else>
             <CardHeader class="flex items-center justify-between">
-                <CardTitle>All Tickets</CardTitle>
+                <CardTitle class="text-lg">All Tickets</CardTitle>
                 <FilterTickets @update:status="filterStatus = $event" @update:priority="filterPriority = $event"
                     @update:search="filterSearch = $event" />
             </CardHeader>
@@ -185,6 +185,7 @@ const confirmDelete = async () => {
                     <table class="min-w-full text-sm text-left border-collapse">
                         <thead>
                             <tr class="border-b text-gray-500">
+                                <th class="py-2 px-3">ID</th>
                                 <th class="py-2 px-3">Ticket ID</th>
                                 <th class="py-2 px-3">Title</th>
                                 <th class="py-2 px-3">Description</th>
@@ -199,6 +200,7 @@ const confirmDelete = async () => {
                             <tr v-for="ticket in filteredTickets" :key="ticket.id"
                                 class="border-b hover:bg-gray-50 transition">
                                 <td class="py-2 px-3 font-medium text-gray-800">{{ ticket.id }}</td>
+                                <td class="py-2 px-3 font-medium text-gray-800">{{ ticket.ticket_id }}</td>
                                 <td class="py-2 px-3">{{ ticket.title }}</td>
                                 <td class="py-2 px-3 max-w-[200px] truncate" :title="ticket.description">
                                     {{ ticket.description }}

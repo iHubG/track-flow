@@ -3,6 +3,7 @@ export type TicketPriority = "low" | "medium" | "high";
 
 export interface TicketPreview {
   id: number;
+  ticket_id: string;
   title: string;
   description: string;
   status: TicketStatus;

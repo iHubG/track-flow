@@ -44,7 +44,7 @@ const tickets = ref([
     <div class="space-y-8">
         <!-- Page Title -->
         <div>
-            <h1 class="text-2xl font-bold tracking-tight">Dashboard</h1>
+            <h1 class="text-xl font-medium tracking-tight">Support Dashboard</h1>
             <p class="text-gray-500 text-sm mt-1">
                 Overview of your ticketing activity and performance.
             </p>

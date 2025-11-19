@@ -74,15 +74,16 @@ const onSubmit = async () => {
         <!-- Priority -->
         <div>
             <Select v-model="priority" :disabled="loading">
-                <SelectTrigger class="w-full" :class="[errors.priority ? 'border-red-500' : 'border-gray-300']">
+                <SelectTrigger class="w-full cursor-pointer"
+                    :class="[errors.priority ? 'border-red-500' : 'border-gray-300']">
                     <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectGroup>
                         <SelectLabel>Priority</SelectLabel>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="low" class="cursor-pointer">Low</SelectItem>
+                        <SelectItem value="medium" class="cursor-pointer">Medium</SelectItem>
+                        <SelectItem value="high" class="cursor-pointer">High</SelectItem>
                     </SelectGroup>
                 </SelectContent>
             </Select>

@@ -24,8 +24,8 @@ watch(search, (v) => emit("update:search", v));
     <div class="flex items-center gap-4">
 
         <!-- Search Bar -->
-        <input v-model="search" type="text" placeholder="Search tickets"
-            class="border rounded-md px-3 py-[6px] text-base w-56" />
+        <input v-model="search" type="search" name="search" placeholder="Search tickets"
+            class="border rounded-md px-3 py-[6px] text-base w-56" autocomplete="off" />
 
         <!-- Status Filter -->
         <Select v-model="status">
