@@ -14,6 +14,14 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog"
 import { MoreHorizontal, Trash, ChevronDown, CircleDot, CircleOff } from "lucide-vue-next";
 
 import type { UserStatus, User } from "@/types";
@@ -21,12 +29,13 @@ import { useUsers } from "@/composables/useUsers"; // ✅ corrected
 import { deleteUser, updateUserStatus } from "@/api/users"; // ✅ corrected
 import { useToast } from "vue-toastification";
 import DeleteDialog from "@/components/DeleteConfirmationModal.vue";
+import CreateNewUser from "@/components/CreateNewUser.vue";
 
 // composable values
 const { users, fetchUsers, loading } = useUsers(true);
 
 const toast = useToast();
-
+const isDialogOpen = ref(false);
 const isDeleteDialogOpen = ref(false);
 const userToDelete = ref<number | null>(null);
 
@@ -96,9 +105,13 @@ const statusColor = (status: string) => {
     }
 };
 
-// ==========================================
-// 🔹 UPDATE USER STATUS
-// ==========================================
+const handleCreateUser = (newUser: User) => {
+    users.value.unshift(newUser);
+    toast.success("User created successfully!");
+    isDialogOpen.value = false;
+};
+
+// Update User Status
 const updateStatus = async (user: User, newStatus: UserStatus) => {
     try {
         await updateUserStatus(user.id, newStatus);
@@ -118,9 +131,7 @@ const updateStatus = async (user: User, newStatus: UserStatus) => {
     }
 };
 
-// ==========================================
-// 🔹 DELETE USER
-// ==========================================
+// Delete User
 const handleDeleteUser = (userId: number) => {
     userToDelete.value = userId;
     isDeleteDialogOpen.value = true;
@@ -152,9 +163,22 @@ const confirmDelete = async () => {
         <!-- Header -->
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-medium">Manage Users</h2>
-            <Button>
-                Create New User
-            </Button>
+            <Dialog v-model:open="isDialogOpen">
+                <DialogTrigger asChild>
+                    <Button class="cursor-pointer">Create User</Button>
+                </DialogTrigger>
+
+                <DialogContent class="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Create User</DialogTitle>
+                        <DialogDescription>
+                            Fill in the form to create a new user.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <CreateNewUser @submit="handleCreateUser" />
+                </DialogContent>
+            </Dialog>
         </div>
 
 
@@ -182,9 +206,9 @@ const confirmDelete = async () => {
                         </thead>
                         <tbody>
 
-                            <tr v-for="user in filteredUsers" :key="user.id"
+                            <tr v-for="(user, index) in filteredUsers" :key="user.id"
                                 class="border-b hover:bg-gray-50 transition">
-                                <td class="py-2 px-3 font-medium text-gray-800">{{ user.id }}</td>
+                                <td class="py-2 px-3 font-medium text-gray-800">{{ index + 1 }}</td>
                                 <td class="py-2 px-3">{{ user.name }}</td>
                                 <td class="py-2 px-3">{{ user.email }}</td>
 
@@ -195,7 +219,8 @@ const confirmDelete = async () => {
                                                 :class="`flex items-center justify-between w-36 rounded-md px-3 py-1.5 cursor-pointer text-sm hover:opacity-90 border ${statusColor(user.status)}`">
                                                 <div class="flex-1 flex items-center gap-2 capitalize">
                                                     <component :is="currentStatusIcon(user.status)" class="h-4 w-4" />
-                                                    {{ user.status.replace('_', ' ') }}
+                                                    {{ (user.status ?? '').replace('_', ' ') }}
+
                                                 </div>
 
                                                 <ChevronDown class="w-4 h-4 opacity-70 ml-2" />

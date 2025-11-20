@@ -152,7 +152,7 @@ const confirmDelete = async () => {
 <template>
     <div class="space-y-6">
         <div class="flex justify-between items-center">
-            <h1 class="text-xl font-medium tracking-tight">Tickets</h1>
+            <h2 class="text-xl font-medium tracking-tight">Tickets</h2>
 
             <Dialog v-model:open="isDialogOpen">
                 <DialogTrigger asChild>
@@ -197,9 +197,9 @@ const confirmDelete = async () => {
                         </thead>
                         <tbody>
 
-                            <tr v-for="ticket in filteredTickets" :key="ticket.id"
+                            <tr v-for="(ticket, index) in filteredTickets" :key="ticket.id"
                                 class="border-b hover:bg-gray-50 transition">
-                                <td class="py-2 px-3 font-medium text-gray-800">{{ ticket.id }}</td>
+                                <td class="py-2 px-3 font-medium text-gray-800">{{ index + 1 }}</td>
                                 <td class="py-2 px-3 font-medium text-gray-800">{{ ticket.ticket_id }}</td>
                                 <td class="py-2 px-3">{{ ticket.title }}</td>
                                 <td class="py-2 px-3 max-w-[200px] truncate" :title="ticket.description">

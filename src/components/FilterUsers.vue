@@ -24,7 +24,7 @@ watch(search, (v) => emit("update:search", v));
     <div class="flex items-center gap-4">
 
         <!-- Search Bar -->
-        <input v-model="search" type="text" placeholder="Search users"
+        <input v-model="search" type="text" name="search" placeholder="Search users"
             class="border rounded-md px-3 py-[6px] text-base w-56" />
 
         <!-- Status Filter -->
