@@ -2,7 +2,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import "./style.css";
 import { router } from "@/router";
-
+import { createPinia } from "pinia";
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 
@@ -16,6 +16,7 @@ import {
 
 addIcons(ViFileTypeVue, RiHome2Line, FaUser, FaUserCircle);
 
+const pinia = createPinia();
 const app = createApp(App);
 
 const toastOptions = {
@@ -32,5 +33,5 @@ const toastOptions = {
 app.component("v-icon", OhVueIcon);
 app.use(router);
 app.use(Toast, toastOptions);
-
+app.use(pinia);
 app.mount("#app");
