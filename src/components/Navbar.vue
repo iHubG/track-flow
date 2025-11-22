@@ -3,6 +3,7 @@ import { useRoute } from 'vue-router'
 import { computed, onMounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 import Button from '@/components/ui/button/Button.vue'
+import Notification from '@/components/Notification.vue'
 
 // ✅ ShadCN dropdown components
 import {
@@ -93,6 +94,7 @@ const userInitials = computed(() => {
               Dashboard
             </Button>
           </RouterLink>
+          <Notification />
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <button class="flex items-center gap-2 focus:outline-none cursor-pointer">

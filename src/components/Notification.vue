@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { Bell, Check } from "lucide-vue-next";
+import { useRouter } from "vue-router";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,9 +14,18 @@ import { Button } from "@/components/ui/button";
 
 import { useAuth } from "@/composables/useAuth";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { useTimeAgo } from "@/composables/useTimeAgo";
+
+const { getTimeAgo } = useTimeAgo();
+
+onMounted(() => {
+    const notificationStore = useNotificationStore();
+    notificationStore.fetchNotifications();
+});
 
 const { user } = useAuth();
 const role = user.value?.role || "guest";
+const router = useRouter();
 
 const notificationStore = useNotificationStore();
 
@@ -26,12 +36,24 @@ const notifications = computed(() => {
     return [];
 });
 
+const notifPath = computed(() => {
+    if (role === "user") return "/user/dashboard";
+    if (role === "support") return "/tickets";
+    if (role === "admin") return "/tickets";
+    return "/";
+});
+
 const unreadCount = computed(() =>
     notifications.value.filter((n) => !n.read).length
 );
 
 const markAllRead = () => {
     notificationStore.markAllAsRead();
+};
+
+const markAsRead = (id: number) => {
+    notificationStore.markAsRead(id);
+    router.push(notifPath.value);
 };
 </script>
 
@@ -60,11 +82,14 @@ const markAllRead = () => {
 
             <template v-else>
                 <DropdownMenuItem v-for="notif in notifications" :key="notif.id"
-                    class="flex flex-col items-start gap-0.5 py-2 px-3 cursor-pointer">
+                    class="flex flex-col items-start gap-0.5 py-2 px-3 cursor-pointer w-full"
+                    @click.stop="markAsRead(notif.id)">
                     <span :class="[notif.read ? 'text-muted-foreground' : 'font-medium']">
                         {{ notif.message }}
                     </span>
-                    <span class="text-xs text-muted-foreground">{{ notif.time }}</span>
+                    <span class="text-xs text-muted-foreground">
+                        {{ getTimeAgo(notif.created_at) }}
+                    </span>
                 </DropdownMenuItem>
             </template>
         </DropdownMenuContent>
