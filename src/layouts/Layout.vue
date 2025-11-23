@@ -54,8 +54,8 @@ const showNavbar = computed(() => {
               <AppBreadcrumb />
             </div>
             <div class="flex gap-5 items-center">
-              <ProfileAvatar />
               <Notification />
+              <ProfileAvatar />
             </div>
           </header>
 

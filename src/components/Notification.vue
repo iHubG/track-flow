@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { Bell, Check } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import {
@@ -18,17 +18,29 @@ import { useTimeAgo } from "@/composables/useTimeAgo";
 
 const { getTimeAgo } = useTimeAgo();
 
-onMounted(() => {
-    const notificationStore = useNotificationStore();
-    notificationStore.fetchNotifications();
-});
-
 const { user } = useAuth();
 const role = user.value?.role || "guest";
 const router = useRouter();
 
 const notificationStore = useNotificationStore();
 
+onMounted(() => {
+    const notificationStore = useNotificationStore();
+    notificationStore.fetchNotifications();
+});
+
+watch(
+    () => user.value?.id,
+    (id) => {
+        if (id && window.Echo) {
+            // Add a small delay to ensure Echo is connected
+            setTimeout(() => {
+                notificationStore.listenForNotifications(id);
+            }, 500);
+        }
+    },
+    { immediate: true }
+);
 const notifications = computed(() => {
     if (role === "user") return notificationStore.userNotifications;
     if (role === "support") return notificationStore.supportNotifications;

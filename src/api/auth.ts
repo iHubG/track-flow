@@ -1,9 +1,5 @@
 import api from "./axios";
-
-// Helper to ensure CSRF cookie is set before any POST request
-const getCsrfCookie = async () => {
-  await api.get("/sanctum/csrf-cookie");
-};
+import { initializeEcho } from "@/bootstrap";
 
 // 🔹 Register User
 export const registerUser = async (
@@ -12,8 +8,6 @@ export const registerUser = async (
   password: string
 ) => {
   try {
-    await getCsrfCookie();
-
     const response = await api.post("/api/register", {
       name,
       email,
@@ -38,13 +32,19 @@ export const loginUser = async (
   remember = false
 ) => {
   try {
-    await getCsrfCookie();
-
     const response = await api.post("/api/login", {
       email,
       password,
       remember,
     });
+
+    // Store token and user
+    localStorage.setItem("token", response.data.token);
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+
+    console.log("Token stored:", response.data.token);
+
+    initializeEcho();
 
     return response.data;
   } catch (error: any) {
@@ -59,13 +59,10 @@ export const getAuthUser = async () => {
     const response = await api.get("/api/user");
     return response.data;
   } catch (error: any) {
-    // If unauthorized, just return null instead of throwing
-
     if (error.response?.status === 401) {
       console.warn("User not authenticated yet");
       return null;
     }
-
     console.error("Get user failed:", error.response?.data || error.message);
     throw error;
   }
@@ -75,6 +72,17 @@ export const getAuthUser = async () => {
 export const logoutUser = async () => {
   try {
     const response = await api.post("/api/logout");
+
+    // Clear stored data
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // Disconnect Echo
+    if (window.Echo) {
+      window.Echo.disconnect();
+      window.Echo = undefined;
+    }
+
     return response.data;
   } catch (error: any) {
     console.error("Logout failed:", error.response?.data || error.message);
