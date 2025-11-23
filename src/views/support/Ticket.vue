@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue"
+import { ref, onMounted } from "vue"
 import { Trash, MoreHorizontal, Clock, CheckCircle, XCircle, ChevronDown } from "lucide-vue-next"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -20,18 +20,16 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
+import { useTicketFilters } from "@/composables/useTicketFilters"
+import { useTicketActions } from "@/composables/useTicketActions"
+import { useTickets } from "@/composables/useTicket"
 
 import CreateTicket from "@/components/CreateTicket.vue"
 import DeleteDialog from "@/components/DeleteConfirmationModal.vue"
 import FilterTickets from "@/components/FilterTickets.vue"
-import { useTickets } from "@/composables/useTicket"
-import { deleteTicket } from "@/api/ticket";
-import { updateTicket } from "@/api/ticket";
 
 const toast = useToast();
 const isDialogOpen = ref(false)
-const isDeleteDialogOpen = ref(false);
-const ticketToDelete = ref<number | null>(null);
 
 const { tickets, fetchTickets, loading } = useTickets(true);
 
@@ -43,46 +41,22 @@ const statuses = [
 
 onMounted(fetchTickets);
 
-// ------------------------------
-// Ticket Filters (Status, Priority, Search)
-// ------------------------------
-const filterStatus = ref("all");
-const filterPriority = ref("all");
-const filterSearch = ref("");
-const debouncedSearch = ref("");
-const messageResult = ref("");
+// Filters
+const {
+    filterStatus,
+    filterPriority,
+    filterSearch,
+    filteredTickets,
+    messageResult,
+} = useTicketFilters(tickets);
 
-let timeout: number;
-
-watch(filterSearch, (val) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-        debouncedSearch.value = val;
-    }, 300); // 300ms debounce
-});
-
-const filteredTickets = computed(() => {
-    const results = tickets.value.filter((t) => {
-        const statusMatch =
-            filterStatus.value === "all" || t.status === filterStatus.value;
-
-        const priorityMatch =
-            filterPriority.value === "all" || t.priority === filterPriority.value;
-
-        const searchMatch =
-            !debouncedSearch.value ||
-            t.title.toLowerCase().includes(debouncedSearch.value.toLowerCase()) ||
-            t.description.toLowerCase().includes(debouncedSearch.value.toLowerCase());
-
-        return statusMatch && priorityMatch && searchMatch;
-    });
-
-    messageResult.value =
-        results.length === 0 ? "No tickets found matching your filters." : "";
-
-    return results;
-});
-
+// Actions
+const {
+    isDeleteDialogOpen,
+    handleDeleteTicket,
+    confirmDelete,
+    updateStatus,
+} = useTicketActions(tickets);
 
 
 const handleCreateTicket = (newTicket: TicketPreview) => {
@@ -109,44 +83,6 @@ const statusColor = (status: string) => {
     }
 };
 
-const updateStatus = async (ticket: TicketPreview, newStatus: TicketStatus) => {
-    try {
-        await updateTicket(ticket.id, {
-            status: newStatus,
-        });
-
-        const ticketIndex = tickets.value.findIndex((t) => t.id === ticket.id);
-        if (ticketIndex !== -1 && tickets.value[ticketIndex]) {
-            tickets.value[ticketIndex].status = newStatus;
-        }
-
-        toast.success("Status updated successfully!");
-    } catch (error: any) {
-        console.error("Failed to update status:", error);
-        toast.error("Failed to update status. Please try again.");
-    }
-};
-
-const handleDeleteTicket = (ticketId: number) => {
-    ticketToDelete.value = ticketId;
-    isDeleteDialogOpen.value = true;
-};
-
-const confirmDelete = async () => {
-    if (!ticketToDelete.value) return;
-
-    try {
-        await deleteTicket(ticketToDelete.value);
-        tickets.value = tickets.value.filter((t) => t.id !== ticketToDelete.value);
-        toast.success("Ticket deleted successfully!");
-    } catch (error: any) {
-        console.error("Failed to delete ticket:", error);
-        toast.error("Unable to delete ticket. Please try again.");
-    } finally {
-        isDeleteDialogOpen.value = false;
-        ticketToDelete.value = null;
-    }
-};
 </script>
 
 <template>
@@ -191,6 +127,7 @@ const confirmDelete = async () => {
                                 <th class="py-2 px-3">Description</th>
                                 <th class="py-2 px-3">Status</th>
                                 <th class="py-2 px-3">Priority</th>
+                                <th class="py-2 px-3">Created By</th>
                                 <th class="py-2 px-3">Created At</th>
                                 <th class="py-2 px-3 text-right"></th>
                             </tr>
@@ -240,6 +177,7 @@ const confirmDelete = async () => {
                                         {{ ticket.priority }}
                                     </Badge>
                                 </td>
+                                <td class="py-2 px-3">{{ ticket.user.name }}</td>
                                 <td class="py-2 px-3 text-gray-500">
                                     {{ new Date(ticket.created_at).toLocaleString() }}
                                 </td>
