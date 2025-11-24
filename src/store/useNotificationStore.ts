@@ -132,14 +132,23 @@ export const useNotificationStore = defineStore("notificationStore", {
     },
 
     stopListening() {
-      if (this.activeChannel && this.currentUserId) {
-        console.log("🔇 Stopping Echo listener for user:", this.currentUserId);
-        window.Echo.leave(`user.${this.currentUserId}`);
-        this.activeChannel = null;
-        this.currentUserId = null;
-      }
-    },
+      if (!window.Echo) return;
 
+      if (this.activeChannel && this.currentUserId) {
+        const channelName = `private-user.${this.currentUserId}`;
+
+        console.log("🔇 Leaving Echo channel:", channelName);
+
+        try {
+          window.Echo.leave(channelName);
+        } catch (err) {
+          console.warn("⚠️ Failed to leave channel:", err);
+        }
+      }
+
+      this.activeChannel = null;
+      this.currentUserId = null;
+    },
     // Call this when user logs out
     clearNotifications() {
       this.stopListening();

@@ -91,6 +91,7 @@ export function useAuth() {
       // Always clear user data regardless of API success
       user.value = null;
       localStorage.removeItem("user");
+      localStorage.removeItem("dashboard_data");
 
       // ⚠️ ADD THIS: Clear Laravel session cookies
       document.cookie =

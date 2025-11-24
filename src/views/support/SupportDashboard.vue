@@ -1,35 +1,76 @@
 <script setup lang="ts">
-import { ref } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Activity, CheckCircle, Clock, Users } from "lucide-vue-next"
+import { fetchDashboardData } from "@/api/dashboard"
+import type { DashboardData } from "@/types"
+import Skeleton from "@/components/ui/skeleton/Skeleton.vue"
+import { useAuth } from "@/composables/useAuth"
 
-// Dashboard Stats
-const stats = ref([
+const dashboardData = ref<DashboardData | null>(null);
+const loading = ref(true);
+const { isAuthenticated } = useAuth();
+
+onMounted(async () => {
+    if (!isAuthenticated.value) return;
+
+    const cached = localStorage.getItem("dashboard_data");
+
+    if (cached) {
+        dashboardData.value = JSON.parse(cached);
+        loading.value = false;
+        return;
+    }
+
+    const fresh = await fetchDashboardData();
+    dashboardData.value = fresh;
+    localStorage.setItem("dashboard_data", JSON.stringify(fresh));
+
+    loading.value = false;
+});
+
+
+
+const stats = computed(() => [
     {
         label: "Total Tickets",
-        value: 128,
+        value: dashboardData.value?.total_tickets ?? 0,
         icon: Activity,
         color: "from-blue-500 to-blue-400",
     },
     {
         label: "Pending",
-        value: 45,
+        value: dashboardData.value?.pending ?? 0,
         icon: Clock,
         color: "from-yellow-500 to-yellow-400",
     },
     {
+        label: "In Progress",
+        value: dashboardData.value?.in_progress ?? 0,
+        icon: Activity,
+        color: "from-orange-500 to-orange-400",
+    },
+    {
         label: "Resolved",
-        value: 78,
+        value: dashboardData.value?.resolved ?? 0,
         icon: CheckCircle,
         color: "from-green-500 to-green-400",
     },
     {
-        label: "Active Agents",
-        value: 6,
+        label: "Active Tickets",
+        value: dashboardData.value?.active ?? 0,
         icon: Users,
         color: "from-purple-500 to-purple-400",
     },
-])
+    {
+        label: "Completed",
+        value: dashboardData.value?.completed ?? 0,
+        icon: CheckCircle,
+        color: "from-emerald-500 to-emerald-400",
+    },
+]);
+
+
 
 // Sample recent tickets
 const tickets = ref([
@@ -50,23 +91,32 @@ const tickets = ref([
             </p>
         </div>
 
-        <!-- Stats Section -->
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <Card v-for="(item, i) in stats" :key="i"
-                class="hover:shadow-md transition-all duration-300 border border-gray-100">
-                <CardHeader class="flex flex-row items-center justify-between pb-2">
-                    <CardTitle class="text-sm font-medium text-gray-500">
-                        {{ item.label }}
-                    </CardTitle>
-                    <div class="p-2 rounded-lg bg-gradient-to-br" :class="item.color">
-                        <component :is="item.icon" class="w-4 h-4 text-white" />
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <p class="text-3xl font-semibold mt-2">{{ item.value }}</p>
-                </CardContent>
-            </Card>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <!-- Skeleton Loading -->
+            <template v-if="loading">
+                <Skeleton v-for="n in 6" :key="n" class="h-30 w-full rounded-lg" />
+            </template>
+
+            <!-- Actual Cards -->
+            <template v-else>
+                <Card v-for="(item, i) in stats" :key="i"
+                    class="hover:shadow-md transition-all duration-300 border border-gray-100">
+                    <CardHeader class="flex flex-row items-center justify-between pb-2">
+                        <CardTitle class="text-sm font-medium text-gray-500">
+                            {{ item.label }}
+                        </CardTitle>
+                        <div class="p-2 rounded-lg bg-gradient-to-br" :class="item.color">
+                            <component :is="item.icon" class="w-4 h-4 text-white" />
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <p class="text-3xl font-semibold mt-2">{{ item.value }}</p>
+                    </CardContent>
+                </Card>
+            </template>
+
         </div>
+
 
         <!-- Recent Tickets -->
         <Card class="border border-gray-100">

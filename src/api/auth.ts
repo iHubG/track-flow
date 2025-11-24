@@ -76,6 +76,7 @@ export const logoutUser = async () => {
     // Clear stored data
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("dashboard_data");
 
     // Disconnect Echo
     if (window.Echo) {
