@@ -7,7 +7,7 @@ import {
 } from "@/api/profile";
 import type { UpdateProfilePayload, ChangePasswordPayload } from "@/types";
 import { useAuth } from "@/composables/useAuth";
-import { useTickets } from "@/composables/useTicket";
+import { useUserTickets } from "@/composables/useTicket";
 
 interface ProfileErrors {
   name?: string;
@@ -193,7 +193,7 @@ export function useProfile() {
 
       // ⚠️ FIX: Clear all user data and session
       const { user } = useAuth(); // Import useAuth
-      const { clearTickets } = useTickets(); // Import useTickets
+      const { clearTickets } = useUserTickets(); // Import useTickets
 
       // Clear user state
       user.value = null;

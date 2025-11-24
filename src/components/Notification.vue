@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, onUnmounted, watch } from "vue";
 import { Bell, Check } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import {
@@ -15,33 +15,67 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/composables/useAuth";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { useTimeAgo } from "@/composables/useTimeAgo";
+import {
+    triggerUserTicketsRefresh,
+    triggerAllTicketsRefresh
+} from "@/composables/useTicket";
 
 const { getTimeAgo } = useTimeAgo();
 
 const { user } = useAuth();
-const role = user.value?.role || "guest";
 const router = useRouter();
-
 const notificationStore = useNotificationStore();
 
-onMounted(() => {
-    const notificationStore = useNotificationStore();
-    notificationStore.fetchNotifications();
+// DON'T initialize composables here - just import the trigger functions
+
+// Helper to trigger the correct event-based refresh
+const triggerRefresh = () => {
+    const role = user.value?.role;
+    if (role === "user") {
+        triggerUserTicketsRefresh();
+    } else {
+        // support and admin
+        triggerAllTicketsRefresh();
+    }
+};
+
+// Fetch notifications on mount (don't refresh tickets here)
+onMounted(async () => {
+    try {
+        await notificationStore.fetchNotifications();
+    } catch (err) {
+        console.error("Notification init error:", err);
+    }
 });
 
+// Ensure Echo listener starts when user becomes available
 watch(
     () => user.value?.id,
-    (id) => {
-        if (id && window.Echo) {
-            // Add a small delay to ensure Echo is connected
+    (newId, oldId) => {
+        // Cleanup old listener if user changed
+        if (oldId && newId !== oldId) {
+            notificationStore.stopListening();
+        }
+
+        if (newId && window.Echo) {
+            // Small delay to ensure Echo is ready
             setTimeout(() => {
-                notificationStore.listenForNotifications(id);
+                notificationStore.listenForNotifications(newId);
             }, 500);
         }
     },
     { immediate: true }
 );
+
+// Clean up listener when component unmounts
+onUnmounted(() => {
+    console.log('🗑️ Notification component unmounting - cleaning up');
+    notificationStore.stopListening();
+});
+
+// Computed lists depending on role
 const notifications = computed(() => {
+    const role = user.value?.role;
     if (role === "user") return notificationStore.userNotifications;
     if (role === "support") return notificationStore.supportNotifications;
     if (role === "admin") return notificationStore.adminNotifications;
@@ -49,26 +83,34 @@ const notifications = computed(() => {
 });
 
 const notifPath = computed(() => {
+    const role = user.value?.role;
     if (role === "user") return "/user/dashboard";
     if (role === "support") return "/tickets";
     if (role === "admin") return "/tickets";
     return "/";
 });
 
-const unreadCount = computed(() =>
-    notifications.value.filter((n) => !n.read).length
-);
+const unreadCount = computed(() => notifications.value.filter((n) => !n.read).length);
 
 const markAllRead = () => {
     notificationStore.markAllAsRead();
 };
 
-const markAsRead = (id: number) => {
-    notificationStore.markAsRead(id);
-    router.push(notifPath.value);
+const markAsRead = async (id: number) => {
+    try {
+        await notificationStore.markAsRead(id);
+
+        // ONLY trigger event-based refresh (don't call direct refresh)
+        // This will refresh tickets in ALL mounted components that are listening
+        triggerRefresh();
+
+        // then navigate
+        router.push(notifPath.value);
+    } catch (err) {
+        console.error("markAsRead error:", err);
+    }
 };
 </script>
-
 
 <template>
     <DropdownMenu>

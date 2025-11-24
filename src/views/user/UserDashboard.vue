@@ -25,7 +25,7 @@ import CreateTicket from "@/components/CreateTicket.vue";
 import FilterTicket from "@/components/FilterTicket.vue";
 import { useToast } from "vue-toastification";
 import { deleteTicket } from "@/api/ticket";
-import { useTickets } from "@/composables/useTicket"; // ✅ add this
+import { useUserTickets } from "@/composables/useTicket"; // ✅ add this
 
 const toast = useToast();
 
@@ -35,9 +35,11 @@ const ticketToDelete = ref<number | null>(null);
 const currentFilter = ref<"open" | "in_progress" | "closed">("open");
 
 // ✅ use the composable
-const { tickets, fetchTickets, loading } = useTickets();
+const { tickets, fetchTickets, loading } = useUserTickets();
 
-onMounted(fetchTickets);
+onMounted(() => {
+    fetchTickets();
+});
 
 // ✅ Computed filters & counts
 const counts = computed(() => ({

@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useTicketFilters } from "@/composables/useTicketFilters"
 import { useTicketActions } from "@/composables/useTicketActions"
-import { useTickets } from "@/composables/useTicket"
+import { useAllTickets } from "@/composables/useTicket"
 
 import CreateTicket from "@/components/CreateTicket.vue"
 import DeleteDialog from "@/components/DeleteConfirmationModal.vue"
@@ -31,7 +31,7 @@ import FilterTickets from "@/components/FilterTickets.vue"
 const toast = useToast();
 const isDialogOpen = ref(false)
 
-const { tickets, fetchTickets, loading } = useTickets(true);
+const { tickets, fetchTickets, loading } = useAllTickets();
 
 const statuses = [
     { label: "Open", value: "open", icon: Clock },
@@ -39,7 +39,9 @@ const statuses = [
     { label: "Closed", value: "closed", icon: XCircle }
 ];
 
-onMounted(fetchTickets);
+onMounted(() => {
+    fetchTickets();
+});
 
 // Filters
 const {

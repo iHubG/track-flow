@@ -41,7 +41,7 @@ export function useTicketActions(tickets: any) {
       const index = tickets.value.findIndex((t: any) => t.id === ticket.id);
       if (index !== -1) tickets.value[index].status = newStatus;
 
-      toast.success("Status updated!");
+      toast.success("Ticket Status updated!");
     } catch (err) {
       toast.error("Failed to update status.");
     }
