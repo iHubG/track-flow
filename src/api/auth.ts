@@ -15,6 +15,13 @@ export const registerUser = async (
       password_confirmation: password,
     });
 
+    localStorage.setItem("token", response.data.token);
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+
+    console.log("Token stored:", response.data.token);
+
+    initializeEcho();
+
     return response.data;
   } catch (error: any) {
     console.error(
