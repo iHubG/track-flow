@@ -18,12 +18,12 @@ export const useNotificationStore = defineStore("notificationStore", {
 
   getters: {
     userNotifications: (state) =>
-      state.notifications.filter((n) => n.role === "user").slice(0, 10), // Limit to 10 latest
+      state.notifications.filter((n) => n.role === "user").slice(0, 10),
 
     supportNotifications: (state) =>
-      state.notifications.filter((n) => n.role === "support").slice(0, 10), // Limit to 10 latest
+      state.notifications.filter((n) => n.role === "support").slice(0, 10),
 
-    adminNotifications: (state) => state.notifications.slice(0, 10), // Limit to 10 latest
+    adminNotifications: (state) => state.notifications.slice(0, 10),
   },
 
   actions: {

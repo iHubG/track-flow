@@ -1,5 +1,6 @@
 import api from "./axios";
 import { initializeEcho } from "@/bootstrap";
+import { useNotificationStore } from "@/store/useNotificationStore";
 
 // 🔹 Register User
 export const registerUser = async (
@@ -78,6 +79,10 @@ export const getAuthUser = async () => {
 // 🔹 Logout User
 export const logoutUser = async () => {
   try {
+    const notificationStore = useNotificationStore();
+    notificationStore.clearNotifications();
+    console.log("Notifications cleared on logout.");
+
     const response = await api.post("/api/logout");
 
     // Clear stored data

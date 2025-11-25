@@ -55,13 +55,17 @@ watch(
         // Cleanup old listener if user changed
         if (oldId && newId !== oldId) {
             notificationStore.stopListening();
+            notificationStore.clearNotifications();
         }
 
         if (newId && window.Echo) {
-            // Small delay to ensure Echo is ready
-            setTimeout(() => {
-                notificationStore.listenForNotifications(newId);
-            }, 500);
+            // Fetch fresh notifications for new user
+            notificationStore.fetchNotifications().then(() => {
+                // Then start listening
+                setTimeout(() => {
+                    notificationStore.listenForNotifications(newId);
+                }, 500);
+            });
         }
     },
     { immediate: true }
