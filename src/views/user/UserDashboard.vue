@@ -21,6 +21,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Skeleton from "@/components/ui/skeleton/Skeleton.vue";
 import CreateTicket from "@/components/CreateTicket.vue";
 import FilterTicket from "@/components/FilterTicket.vue";
 import { useToast } from "vue-toastification";
@@ -114,7 +115,21 @@ const confirmDelete = async () => {
             </Dialog>
         </div>
 
-        <div v-if="loading" class="max-w-xl text-center text-gray-500 text-sm mt-10">Loading tickets...</div>
+        <div v-if="loading" class="grid gap-4 max-w-xl">
+            <div v-for="i in 3" :key="i" class="border rounded-lg p-4 space-y-3 flex justify-between">
+                <div class="flex flex-col gap-2">
+                    <Skeleton class="h-6 w-30" />
+                    <Skeleton class="h-6 w-22" />
+                    <Skeleton class="h-6 w-20" />
+                </div>
+
+                <div class="flex flex-col justify-between items-center">
+                    <Skeleton class="h-6 w-20" />
+                    <Skeleton class="h-6 w-24" />
+                </div>
+            </div>
+        </div>
+
         <div v-else-if="filteredTickets.length" class="grid gap-4">
             <CardTicket v-for="t in filteredTickets" :key="t.id" :ticket="t" @delete="handleDeleteTicket" />
         </div>
