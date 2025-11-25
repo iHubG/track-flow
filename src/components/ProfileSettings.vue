@@ -68,11 +68,12 @@ const handleSaveProfile = async () => {
 }
 
 const handleSavePassword = async () => {
-    const success = await handleChangePassword()
+    const success = await handleChangePassword();
+
     if (success) {
         toast.success("Password changed successfully!");
-    } else {
-        toast.error("Failed to change password");
+    } else if (errors.value.general) {
+        toast.error(errors.value.general);
     }
 }
 
@@ -180,7 +181,7 @@ const handleConfirmDelete = async () => {
                         </button>
                     </div>
                     <span v-if="errors.new_password" class="text-xs text-red-500 mt-1 px-1">{{ errors.new_password
-                        }}</span>
+                    }}</span>
                 </div>
 
                 <!-- New Password Confirmation -->

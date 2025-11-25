@@ -202,12 +202,9 @@ export function useProfile() {
       // Clear tickets cache
       clearTickets();
 
-      // Clear Laravel session cookies
-      ["XSRF-TOKEN", "laravel_session"].forEach((name) => {
-        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=localhost`;
-        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=127.0.0.1`;
-      });
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("dashboard_data");
 
       return true;
     } catch (err) {
