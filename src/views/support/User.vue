@@ -23,10 +23,10 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog"
 import { MoreHorizontal, Trash, ChevronDown, CircleDot, CircleOff } from "lucide-vue-next";
-
+import Skeleton from "@/components/ui/skeleton/Skeleton.vue";
 import type { UserStatus, User } from "@/types";
-import { useUsers } from "@/composables/useUsers"; // ✅ corrected
-import { deleteUser, updateUserStatus } from "@/api/users"; // ✅ corrected
+import { useUsers } from "@/composables/useUsers";
+import { deleteUser, updateUserStatus } from "@/api/users";
 import { useToast } from "vue-toastification";
 import DeleteDialog from "@/components/DeleteConfirmationModal.vue";
 import CreateNewUser from "@/components/CreateNewUser.vue";
@@ -182,7 +182,20 @@ const confirmDelete = async () => {
         </div>
 
 
-        <div v-if="loading" class="text-center text-gray-500 text-sm mt-10 lg:mt-20">Loading users...</div>
+        <div v-if="loading" class="mt-10 lg:mt-15">
+            <div class="flex flex-row justify-between mb-10">
+                <div class="w-1/2">
+                    <Skeleton class="h-10 w-30 mb-4" />
+                </div>
+                <div class="flex flex-row gap-3 w-full">
+                    <Skeleton v-for="i in 3" :key="i" class="h-10 w-full mb-4" />
+                </div>
+            </div>
+            <div class="flex flex-row gap-2 w-full">
+                <Skeleton v-for="i in 6" :key="i" class="h-10 w-full mb-4" />
+            </div>
+            <Skeleton v-for="i in 3" :key="i" class="h-10 w-full mb-4" />
+        </div>
 
         <Card v-else>
             <CardHeader class="flex items-center justify-between">

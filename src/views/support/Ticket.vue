@@ -111,7 +111,7 @@ const statusColor = (status: string) => {
             </Dialog>
         </div>
 
-        <div v-if="loading" class="text-center text-gray-500 text-sm mt-10 lg:mt-15">
+        <div v-if="loading" class="mt-10 lg:mt-15">
             <div class="flex flex-row justify-between mb-10">
                 <div class="w-1/2">
                     <Skeleton class="h-10 w-30 mb-4" />

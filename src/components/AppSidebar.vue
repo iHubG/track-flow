@@ -15,55 +15,76 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from "@/components/ui/sidebar"
 
-const items = [
-    {
-        title: "Dashboard",
-        url: "/support/dashboard",
-        icon: Home,
-    },
-    {
-        title: "Tickets",
-        url: "/tickets",
-        icon: Ticket,
-    },
-    {
-        title: "Users",
-        url: "/manage-users",
-        icon: Users,
-    },
-]
+import {
+    TooltipProvider,
+} from "@/components/ui/tooltip"
+import { useAuth } from "@/composables/useAuth"
+import { useRoute } from "vue-router"
+
+const { user } = useAuth();
+const { state } = useSidebar()
+const route = useRoute()
+
+type UserRole = "support" | "admin";
+
+const role = user.value.role as UserRole;
+
+const menuItems: Record<UserRole, Array<{ title: string; url: string; icon: any }>> = {
+    support: [
+        { title: "Dashboard", url: "/support/dashboard", icon: Home },
+        { title: "Tickets", url: "/tickets", icon: Ticket },
+        { title: "Users", url: "/manage-users", icon: Users },
+    ],
+
+    admin: [
+        { title: "Dashboard", url: "/admin/dashboard", icon: Home },
+        { title: "Tickets", url: "/tickets", icon: Ticket },
+        { title: "Users", url: "/manage-users", icon: Users },
+    ],
+};
+
+const items = menuItems[role] ?? [];
+
+const isActive = (url: string) => {
+    return route.path === url
+}
+
 </script>
 
 <template>
-    <Sidebar>
-        <!-- 🔹 Sidebar Heading -->
-        <SidebarHeader class="p-4 border-b border-gray-200">
+    <Sidebar collapsible="icon">
+        <SidebarHeader v-if="state === 'expanded'" class="p-4 border-b border-gray-200">
             <h1 class="text-lg font-semibold tracking-tight text-gray-800">
-                Support Desk
+                {{ role === 'support' ? 'Support Desk' : 'Admin Panel' }}
             </h1>
             <p class="text-xs text-gray-500">Ticketing System</p>
         </SidebarHeader>
 
-        <SidebarContent>
+        <SidebarContent :class="{ 'pt-2': state === 'collapsed' }">
             <SidebarGroup>
-                <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
+                <SidebarGroupLabel v-if="state === 'expanded'">
+                    Main Menu
+                </SidebarGroupLabel>
+
                 <SidebarGroupContent>
                     <SidebarMenu>
-                        <SidebarMenuItem v-for="item in items" :key="item.title">
-                            <SidebarMenuButton asChild>
-                                <RouterLink :to="item.url"
-                                    class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition-colors"
-                                    active-class="text-blue-600 font-medium">
-                                    <component :is="item.icon" class="w-4 h-4" />
-                                    <span>{{ item.title }}</span>
-                                </RouterLink>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
+                        <TooltipProvider>
+                            <SidebarMenuItem v-for="item in items" :key="item.title">
+                                <SidebarMenuButton :tooltip="item.title" :isActive="isActive(item.url)" asChild>
+                                    <RouterLink :to="item.url">
+                                        <component :is="item.icon" />
+                                        <span>{{ item.title }}</span>
+                                    </RouterLink>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </TooltipProvider>
                     </SidebarMenu>
                 </SidebarGroupContent>
             </SidebarGroup>
         </SidebarContent>
+
     </Sidebar>
 </template>
