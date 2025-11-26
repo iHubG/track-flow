@@ -89,17 +89,18 @@ const confirmDelete = async () => {
 
 
 <template>
-    <section class="py-4 px-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
-            <div class="w-xl flex justify-between">
-                <h2 class="text-2xl font-semibold">My Tickets</h2>
+    <section class="py-4 px-2 lg:px-6">
+        <div class="flex flex-col-reverse md:flex-row md:items-end md:justify-between gap-4 mb-5">
+
+            <div class="w-full max-w-xl flex flex-col lg:flex-row justify-between gap-5 lg:gap-10">
+                <h2 class="hidden md:flex text-2xl font-semibold text-nowrap">My Tickets</h2>
 
                 <FilterTicket :counts="counts" @change-filter="handleFilterChange" />
             </div>
 
             <Dialog v-model:open="isDialogOpen">
                 <DialogTrigger asChild>
-                    <Button class="cursor-pointer">Create Ticket</Button>
+                    <Button class="cursor-pointer max-w-xl">Create Ticket</Button>
                 </DialogTrigger>
 
                 <DialogContent class="max-w-lg">
@@ -113,9 +114,11 @@ const confirmDelete = async () => {
                     <CreateTicket @submit="handleCreateTicket" />
                 </DialogContent>
             </Dialog>
+
+            <h2 class="md:hidden text-2xl font-semibold text-nowrap">My Tickets</h2>
         </div>
 
-        <div v-if="loading" class="grid gap-4 max-w-xl">
+        <div v-if="loading" class="grid gap-4 max-w-xl mt-10 md:mt-0">
             <div v-for="i in 3" :key="i" class="border rounded-lg p-4 space-y-3 flex justify-between">
                 <div class="flex flex-col gap-2">
                     <Skeleton class="h-6 w-30" />
@@ -130,7 +133,7 @@ const confirmDelete = async () => {
             </div>
         </div>
 
-        <div v-else-if="filteredTickets.length" class="grid gap-4">
+        <div v-else-if="filteredTickets.length" class="grid gap-4 mt-10 md:mt-0">
             <CardTicket v-for="t in filteredTickets" :key="t.id" :ticket="t" @delete="handleDeleteTicket" />
         </div>
         <p v-else class="max-w-xl text-center text-gray-500 text-sm mt-10">

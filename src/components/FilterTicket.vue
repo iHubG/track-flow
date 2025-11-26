@@ -27,13 +27,15 @@ const handleFilterClick = (filter: FilterType) => {
 </script>
 
 <template>
-    <div class="flex gap-3">
-        <Button v-for="f in filters" :key="f.value" variant="outline" @click="handleFilterClick(f.value)" :class="[
-            activeFilter === f.value
-                ? 'bg-primary text-white border-primary'
-                : 'text-gray-600'
-        ]">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+        <Button v-for="f in filters" :key="f.value" variant="outline" @click="handleFilterClick(f.value)" class="w-full"
+            :class="[
+                activeFilter === f.value
+                    ? 'bg-primary text-white border-primary'
+                    : 'text-gray-600'
+            ]">
             {{ f.label }} ({{ props.counts[f.value] }})
         </Button>
     </div>
+
 </template>
