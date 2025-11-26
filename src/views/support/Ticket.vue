@@ -20,6 +20,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
+import Skeleton from "@/components/ui/skeleton/Skeleton.vue"
 import { useTicketFilters } from "@/composables/useTicketFilters"
 import { useTicketActions } from "@/composables/useTicketActions"
 import { useAllTickets } from "@/composables/useTicket"
@@ -110,7 +111,20 @@ const statusColor = (status: string) => {
             </Dialog>
         </div>
 
-        <div v-if="loading" class="text-center text-gray-500 text-sm mt-10 lg:mt-20">Loading tickets...</div>
+        <div v-if="loading" class="text-center text-gray-500 text-sm mt-10 lg:mt-15">
+            <div class="flex flex-row justify-between mb-10">
+                <div class="w-1/2">
+                    <Skeleton class="h-10 w-30 mb-4" />
+                </div>
+                <div class="flex flex-row gap-3 w-full">
+                    <Skeleton v-for="i in 3" :key="i" class="h-10 w-full mb-4" />
+                </div>
+            </div>
+            <div class="flex flex-row gap-2 w-full">
+                <Skeleton v-for="i in 8" :key="i" class="h-10 w-full mb-4" />
+            </div>
+            <Skeleton v-for="i in 3" :key="i" class="h-10 w-full mb-4" />
+        </div>
 
         <Card v-else>
             <CardHeader class="flex items-center justify-between">
