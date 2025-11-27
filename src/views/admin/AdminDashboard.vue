@@ -1,153 +1,185 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue"
+import { onMounted, computed } from "vue"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Activity, CheckCircle, Clock, Users } from "lucide-vue-next"
-import { fetchDashboardData } from "@/api/dashboard"
-import type { DashboardData } from "@/types"
+import {
+    Users,
+    Headphones,
+    Ticket,
+    Plus,
+    Activity,
+    CheckCircle2,
+    TrendingUp,
+    TrendingDown,
+    Minus
+} from "lucide-vue-next"
+import { useDashboard } from '@/composables/useDashboard';
+
 import Skeleton from "@/components/ui/skeleton/Skeleton.vue"
 import { useAuth } from "@/composables/useAuth"
 
-const dashboardData = ref<DashboardData | null>(null);
-const loading = ref(true);
 const { isAuthenticated } = useAuth();
+const { dashboardData, loading, fetchDashboard } = useDashboard();
 
 onMounted(async () => {
     if (!isAuthenticated.value) return;
-
-    const cached = localStorage.getItem("dashboard_data");
-
-    if (cached) {
-        dashboardData.value = JSON.parse(cached);
-        loading.value = false;
-        return;
-    }
-
-    const fresh = await fetchDashboardData();
-    dashboardData.value = fresh;
-    localStorage.setItem("dashboard_data", JSON.stringify(fresh));
-
-    loading.value = false;
+    await fetchDashboard();
 });
-
-
 
 const stats = computed(() => [
     {
+        label: "Total Users",
+        value: dashboardData.value?.total_users ?? 0,
+        icon: Users,
+        color: "from-blue-500 to-blue-400",
+        description: "Registered users",
+        change: dashboardData.value?.users_change,
+    },
+    {
+        label: "Total Support Agents",
+        value: dashboardData.value?.total_support ?? 0,
+        icon: Headphones,
+        color: "from-indigo-500 to-indigo-400",
+        description: "Active support staff",
+        change: dashboardData.value?.support_change,
+    },
+    {
         label: "Total Tickets",
         value: dashboardData.value?.total_tickets ?? 0,
-        icon: Activity,
-        color: "from-blue-500 to-blue-400",
-    },
-    {
-        label: "Pending",
-        value: dashboardData.value?.pending ?? 0,
-        icon: Clock,
-        color: "from-yellow-500 to-yellow-400",
-    },
-    {
-        label: "In Progress",
-        value: dashboardData.value?.in_progress ?? 0,
-        icon: Activity,
+        icon: Ticket,
         color: "from-orange-500 to-orange-400",
+        description: "All time tickets",
+        change: dashboardData.value?.tickets_change,
     },
     {
-        label: "Resolved",
-        value: dashboardData.value?.resolved ?? 0,
-        icon: CheckCircle,
-        color: "from-green-500 to-green-400",
+        label: "New Tickets Today",
+        value: dashboardData.value?.new_tickets_today ?? 0,
+        icon: Plus,
+        color: "from-amber-500 to-amber-400",
+        description: "Created today",
+        change: dashboardData.value?.new_change,
     },
     {
         label: "Active Tickets",
-        value: dashboardData.value?.active ?? 0,
-        icon: Users,
+        value: dashboardData.value?.active_tickets_today ?? 0,
+        icon: Activity,
         color: "from-purple-500 to-purple-400",
+        description: "In progress",
+        change: dashboardData.value?.active_change,
     },
     {
-        label: "Completed",
-        value: dashboardData.value?.completed ?? 0,
-        icon: CheckCircle,
+        label: "Resolved Today",
+        value: dashboardData.value?.resolved_tickets_today ?? 0,
+        icon: CheckCircle2,
         color: "from-emerald-500 to-emerald-400",
+        description: "Closed tickets",
+        change: dashboardData.value?.resolved_change,
     },
 ]);
 
+// Helper to determine trend icon and color
+const getTrendIcon = (change?: number) => {
+    if (!change) return Minus;
+    return change > 0 ? TrendingUp : TrendingDown;
+};
 
+const getTrendColor = (change?: number) => {
+    if (!change) return "text-gray-400";
+    return change > 0 ? "text-green-600" : "text-red-600";
+};
 
-// Sample recent tickets
-const tickets = ref([
-    { id: 101, title: "Login issue on portal", user: "John Doe", status: "Pending" },
-    { id: 102, title: "Unable to reset password", user: "Mary Jane", status: "Resolved" },
-    { id: 103, title: "Bug in mobile app", user: "Alex Cruz", status: "Pending" },
-    { id: 104, title: "Feature request: Dark mode", user: "Sophia Lee", status: "Open" },
-])
 </script>
 
 <template>
     <div class="space-y-8">
-        <!-- Page Title -->
-        <div>
-            <h1 class="text-xl font-medium tracking-tight">Admin Dashboard</h1>
-            <p class="text-gray-500 text-sm mt-1">
-                Overview of your ticketing activity and performance.
-            </p>
+        <!-- Page Title with Refresh Button -->
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-medium tracking-tight">Admin Dashboard</h1>
+                <p class="text-gray-500 text-sm mt-1">
+                    Overview of your ticketing activity and performance.
+                </p>
+            </div>
         </div>
 
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <!-- Skeleton Loading -->
             <template v-if="loading">
-                <Skeleton v-for="n in 6" :key="n" class="h-30 w-full rounded-lg" />
+                <Skeleton v-for="n in 6" :key="n" class="h-32 w-full rounded-lg" />
             </template>
 
             <!-- Actual Cards -->
             <template v-else>
                 <Card v-for="(item, i) in stats" :key="i"
-                    class="hover:shadow-md transition-all duration-300 border border-gray-100">
+                    class="hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-gray-200">
                     <CardHeader class="flex flex-row items-center justify-between pb-2">
-                        <CardTitle class="text-sm font-medium text-gray-500">
-                            {{ item.label }}
-                        </CardTitle>
-                        <div class="p-2 rounded-lg bg-gradient-to-br" :class="item.color">
-                            <component :is="item.icon" class="w-4 h-4 text-white" />
+                        <div class="flex-1">
+                            <CardTitle class="text-sm font-medium text-gray-500">
+                                {{ item.label }}
+                            </CardTitle>
+                            <p class="text-xs text-gray-400 mt-1">{{ item.description }}</p>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-gradient-to-br shadow-sm" :class="item.color">
+                            <component :is="item.icon" class="w-5 h-5 text-white" />
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <p class="text-3xl font-semibold mt-2">{{ item.value }}</p>
+                        <div class="flex items-end justify-between">
+                            <p class="text-3xl font-semibold">{{ item.value }}</p>
+                            <!-- Optional: Show percentage change -->
+                            <div v-if="item.change !== undefined" class="flex items-center text-xs font-medium"
+                                :class="getTrendColor(item.change)">
+                                <component :is="getTrendIcon(item.change)" class="w-3 h-3 mr-0.5" />
+                                {{ item.change ? Math.abs(item.change) : 0 }}%
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </template>
-
         </div>
 
-
-        <!-- Recent Tickets -->
-        <Card class="border border-gray-100">
-            <CardHeader>
-                <div class="flex justify-between items-center">
-                    <CardTitle class="text-lg font-semibold">Recent Tickets</CardTitle>
-                    <button class="text-sm text-blue-600 hover:text-blue-700 transition">
-                        View All
+        <!-- Additional Features Section -->
+        <div class="grid gap-6 lg:grid-cols-2">
+            <!-- Quick Actions -->
+            <Card class="border border-gray-100">
+                <CardHeader>
+                    <CardTitle class="text-base">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent class="space-y-2">
+                    <button
+                        class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                        View All Tickets
                     </button>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <ul class="divide-y divide-gray-200">
-                    <li v-for="ticket in tickets" :key="ticket.id" class="py-3 flex justify-between items-center">
-                        <div>
-                            <p class="font-medium text-gray-800">{{ ticket.title }}</p>
-                            <p class="text-sm text-gray-500">
-                                Opened by {{ ticket.user }}
-                            </p>
-                        </div>
+                    <button
+                        class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                        Manage Users
+                    </button>
+                    <button
+                        class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                        Export Reports
+                    </button>
+                </CardContent>
+            </Card>
 
-                        <span class="text-xs font-medium px-2.5 py-1 rounded-full capitalize" :class="{
-                            'bg-yellow-100 text-yellow-700': ticket.status === 'Pending',
-                            'bg-green-100 text-green-700': ticket.status === 'Resolved',
-                            'bg-blue-100 text-blue-700': ticket.status === 'Open',
-                        }">
-                            {{ ticket.status }}
-                        </span>
-                    </li>
-                </ul>
-            </CardContent>
-        </Card>
+            <!-- Recent Activity -->
+            <Card class="border border-gray-100">
+                <CardHeader>
+                    <CardTitle class="text-base">System Status</CardTitle>
+                </CardHeader>
+                <CardContent class="space-y-3">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600">Average Response Time</span>
+                        <span class="font-medium">2.5 hrs</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600">Resolution Rate</span>
+                        <span class="font-medium text-green-600">94%</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600">Customer Satisfaction</span>
+                        <span class="font-medium">4.8/5.0</span>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     </div>
 </template>
