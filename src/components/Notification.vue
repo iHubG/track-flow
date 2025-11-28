@@ -19,12 +19,13 @@ import {
     triggerUserTicketsRefresh,
     triggerAllTicketsRefresh
 } from "@/composables/useTicket";
+import { useAssignedTickets } from "@/composables/useAssignedTickets";
 
 const { getTimeAgo } = useTimeAgo();
-
 const { user } = useAuth();
 const router = useRouter();
 const notificationStore = useNotificationStore();
+const { refreshAssignedTickets } = useAssignedTickets(user.value?.id || 0);
 
 // DON'T initialize composables here - just import the trigger functions
 
@@ -33,9 +34,11 @@ const triggerRefresh = () => {
     const role = user.value?.role;
     if (role === "user") {
         triggerUserTicketsRefresh();
+    } else if (role === "support") {
+        refreshAssignedTickets();
     } else {
-        // support and admin
         triggerAllTicketsRefresh();
+
     }
 };
 
@@ -89,8 +92,8 @@ const notifications = computed(() => {
 const notifPath = computed(() => {
     const role = user.value?.role;
     if (role === "user") return "/user/dashboard";
-    if (role === "support") return "/tickets";
-    if (role === "admin") return "/tickets";
+    if (role === "support") return "/support/tickets";
+    if (role === "admin") return "/admin/tickets";
     return "/";
 });
 

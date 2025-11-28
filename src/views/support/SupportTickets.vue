@@ -46,7 +46,7 @@ const {
     loading,
 } = useAssignedTickets(supportUserId, true);
 
-onMounted(fetchAssignedTickets);
+// onMounted(fetchAssignedTickets);
 
 // Filters
 const {
