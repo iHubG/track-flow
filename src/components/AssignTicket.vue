@@ -8,12 +8,11 @@ import { getSupportUsers } from '@/api/users'
 import { ref, onMounted } from 'vue'
 import type { User } from '@/types/user'
 
-// Props
 const props = defineProps<{
     ticketId: number
+    isAssigning?: boolean   // 👈 parent controls loading state
 }>()
 
-// Emits
 const emit = defineEmits(['assign'])
 
 const supportUsers = ref<User[]>([])
@@ -23,7 +22,6 @@ onMounted(async () => {
     supportUsers.value = await getSupportUsers()
 })
 
-// Called when assigning in modal
 function assignUser() {
     if (!selectedUserId.value) return
     emit('assign', {
@@ -43,7 +41,6 @@ function assignUser() {
             <SelectContent>
                 <SelectGroup>
                     <SelectLabel>Support Users</SelectLabel>
-
                     <SelectItem v-for="user in supportUsers" :key="user.id" :value="user.id.toString()">
                         {{ user.name }}
                     </SelectItem>
@@ -51,8 +48,8 @@ function assignUser() {
             </SelectContent>
         </Select>
 
-        <Button class="w-full" @click="assignUser">
-            Assign Ticket
+        <Button class="w-full" @click="assignUser" :disabled="props.isAssigning">
+            {{ props.isAssigning ? 'Assigning...' : 'Assign User' }}
         </Button>
     </div>
 </template>

@@ -11,7 +11,7 @@ export const getUserTickets = async (): Promise<TicketPreview[]> => {
   return response.data;
 };
 
-// 🔹 Get ALL tickets (for support dashboard/admin)
+// 🔹 Get ALL tickets (admin)
 export const getAllTickets = async (): Promise<TicketPreview[]> => {
   const response = await api.get<TicketPreview[]>("/api/tickets/all");
   return response.data;
@@ -41,6 +41,17 @@ export const assignTicketToSupport = async (
     { userId }
   );
   return response.data;
+};
+
+// Fetch Tickets Assigned to a Specific Support User
+export const getTicketsBySupportUser = async (
+  userId: number
+): Promise<TicketPreview[]> => {
+  const response = await api.get<{ data: TicketPreview[] }>(
+    `/api/tickets/assigned/${userId}`
+  );
+
+  return response.data.data;
 };
 
 // 🔹 Update a ticket status

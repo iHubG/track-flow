@@ -35,7 +35,7 @@ const toast = useToast();
 const isDialogOpen = ref(false);
 const isAssignDialogOpen = ref(false);
 const selectedTicket = ref<TicketPreview | null>(null);
-
+const isAssigning = ref(false)
 
 const { tickets, fetchTickets, refreshTickets, loading } = useAllTickets();
 
@@ -91,14 +91,16 @@ function handleAssignTicket(ticket: TicketPreview) {
 
 
 async function onAssign({ ticketId, userId }: { ticketId: number; userId: number }) {
-    await assignTicketToSupport(ticketId, userId);
+    try {
+        isAssigning.value = true;
+        await assignTicketToSupport(ticketId, userId);
+        await refreshTickets();
 
-    // Refresh tickets
-    await refreshTickets();
-
-    toast.success("Ticket assigned successfully");
-
-    isAssignDialogOpen.value = false;
+        toast.success("Ticket assigned successfully");
+        isAssignDialogOpen.value = false;
+    } finally {
+        isAssigning.value = false;
+    }
 }
 
 
@@ -279,7 +281,8 @@ const statusColor = (status: string) => {
                     </DialogDescription>
                 </DialogHeader>
 
-                <AssignUserModal v-if="selectedTicket" :ticketId="selectedTicket.id" @assign="onAssign" />
+                <AssignUserModal v-if="selectedTicket" :is-assigning="isAssigning" :ticketId="selectedTicket.id"
+                    @assign="onAssign" />
             </DialogContent>
         </Dialog>
     </div>

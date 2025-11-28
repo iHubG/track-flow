@@ -35,8 +35,8 @@ const role = user.value.role as UserRole;
 const menuItems: Record<UserRole, Array<{ title: string; url: string; icon: any }>> = {
     support: [
         { title: "Dashboard", url: "/support/dashboard", icon: Home },
-        { title: "Tickets", url: "/tickets", icon: Ticket },
-        { title: "Users", url: "/manage-users", icon: Users },
+        { title: "Tickets", url: "/support/tickets", icon: Ticket },
+        { title: "Users", url: "/support/users", icon: Users },
     ],
 
     admin: [

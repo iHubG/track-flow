@@ -5,8 +5,8 @@ import NotFound from "@/views/NotFound.vue";
 
 import UserDashboard from "@/views/user/UserDashboard.vue";
 import SupportDashboard from "@/views/support/SupportDashboard.vue";
-import Ticket from "@/views/support/Ticket.vue";
-import User from "@/views/support/User.vue";
+import SupportTickets from "@/views/support/SupportTickets.vue";
+import SupportUsers from "@/views/support/SupportUsers.vue";
 import AdminTickets from "@/views/admin/AdminTickets.vue";
 import AdminUsers from "@/views/admin/AdminUsers.vue";
 import ProfileSettings from "@/components/ProfileSettings.vue";
@@ -88,14 +88,14 @@ const routes = [
           title: "Support Dashboard",
           breadcrumb: "Support Dashboard",
           requiresAuth: true,
-          roles: ["support", "admin"],
+          roles: ["support"],
         },
       },
 
       {
-        path: "tickets",
-        name: "Tickets",
-        component: Ticket,
+        path: "support/tickets",
+        name: "Support Tickets",
+        component: SupportTickets,
         meta: {
           title: "Tickets",
           breadcrumb: "Tickets",
@@ -105,12 +105,12 @@ const routes = [
       },
 
       {
-        path: "manage-users",
-        name: "Manage Users",
-        component: User,
+        path: "support/users",
+        name: "Support Users",
+        component: SupportUsers,
         meta: {
-          title: "Manage Users",
-          breadcrumb: "Manage Users",
+          title: "Users",
+          breadcrumb: "Users",
           requiresAuth: true,
           roles: ["support"],
         },
@@ -131,7 +131,7 @@ const routes = [
 
       {
         path: "admin/tickets",
-        name: "Tickets",
+        name: "Admin Tickets",
         component: AdminTickets,
         meta: {
           title: "Tickets",
