@@ -14,30 +14,15 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import {
-    Dialog,
-    DialogTrigger,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog"
 import { MoreHorizontal, Trash, ChevronDown, CircleDot, CircleOff } from "lucide-vue-next";
 import Skeleton from "@/components/ui/skeleton/Skeleton.vue";
 import type { UserStatus, User } from "@/types";
 import { useUsers } from "@/composables/useUsers";
-import { deleteUser, updateUserStatus } from "@/api/users";
+import { updateUserStatus } from "@/api/users";
 import { useToast } from "vue-toastification";
-import DeleteDialog from "@/components/DeleteConfirmationModal.vue";
-import CreateNewUser from "@/components/CreateNewUser.vue";
 
-// composable values
 const { users, fetchUsers, loading } = useUsers(true);
-
 const toast = useToast();
-const isDialogOpen = ref(false);
-const isDeleteDialogOpen = ref(false);
-const userToDelete = ref<number | null>(null);
 
 const statuses = [
     { label: "Active", value: "active", icon: CircleDot },
@@ -105,11 +90,7 @@ const statusColor = (status: string) => {
     }
 };
 
-const handleCreateUser = (newUser: User) => {
-    users.value.unshift(newUser);
-    toast.success("User created successfully!");
-    isDialogOpen.value = false;
-};
+
 
 // Update User Status
 const updateStatus = async (user: User, newStatus: UserStatus) => {
@@ -131,30 +112,6 @@ const updateStatus = async (user: User, newStatus: UserStatus) => {
     }
 };
 
-// Delete User
-const handleDeleteUser = (userId: number) => {
-    userToDelete.value = userId;
-    isDeleteDialogOpen.value = true;
-};
-
-const confirmDelete = async () => {
-    if (!userToDelete.value) return;
-
-    try {
-        const { message } = await deleteUser(userToDelete.value);
-
-        users.value = users.value.filter((u) => u.id !== userToDelete.value);
-
-        toast.success(message);
-    } catch (error: any) {
-        console.error(error);
-        toast.error(error.response?.data?.message || "Failed to delete user.");
-    } finally {
-        isDeleteDialogOpen.value = false;
-        userToDelete.value = null;
-    }
-};
-
 </script>
 
 
@@ -162,23 +119,7 @@ const confirmDelete = async () => {
     <div class="space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-medium">Manage Users</h2>
-            <Dialog v-model:open="isDialogOpen">
-                <DialogTrigger asChild>
-                    <Button class="cursor-pointer">Create User</Button>
-                </DialogTrigger>
-
-                <DialogContent class="max-w-lg">
-                    <DialogHeader>
-                        <DialogTitle>Create User</DialogTitle>
-                        <DialogDescription>
-                            Fill in the form to create a new user.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <CreateNewUser @submit="handleCreateUser" />
-                </DialogContent>
-            </Dialog>
+            <h2 class="text-xl font-medium">Users</h2>
         </div>
 
 
@@ -275,9 +216,9 @@ const confirmDelete = async () => {
                                         </DropdownMenuTrigger>
 
                                         <DropdownMenuContent class="w-40 mr-5">
-                                            <DropdownMenuItem @click="handleDeleteUser(user.id)" class="cursor-pointer">
+                                            <DropdownMenuItem class="cursor-pointer">
                                                 <Trash class="mr-2 h-4 w-4" />
-                                                <span>Delete</span>
+                                                <span>Edit</span>
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
@@ -291,10 +232,5 @@ const confirmDelete = async () => {
                 </div>
             </CardContent>
         </Card>
-
-
-
-        <DeleteDialog v-model="isDeleteDialogOpen" description="This will permanently delete your ticket."
-            @confirm="confirmDelete" />
     </div>
 </template>
