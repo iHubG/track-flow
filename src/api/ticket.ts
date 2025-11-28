@@ -31,6 +31,18 @@ export const createTicket = async (
   return response.data;
 };
 
+// Assign Ticket to Support User
+export const assignTicketToSupport = async (
+  ticketId: number,
+  userId: number
+): Promise<TicketPreview> => {
+  const response = await api.put<TicketPreview>(
+    `/api/tickets/${ticketId}/assign`,
+    { userId }
+  );
+  return response.data;
+};
+
 // 🔹 Update a ticket status
 export const updateTicket = async (
   ticketId: number,

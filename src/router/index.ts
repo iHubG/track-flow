@@ -7,8 +7,9 @@ import UserDashboard from "@/views/user/UserDashboard.vue";
 import SupportDashboard from "@/views/support/SupportDashboard.vue";
 import Ticket from "@/views/support/Ticket.vue";
 import User from "@/views/support/User.vue";
+import AdminTickets from "@/views/admin/AdminTickets.vue";
+import AdminUsers from "@/views/admin/AdminUsers.vue";
 import ProfileSettings from "@/components/ProfileSettings.vue";
-
 import AdminDashboard from "@/views/admin/AdminDashboard.vue";
 
 import Login from "@/views/auth/Login.vue";
@@ -53,6 +54,18 @@ const routes = [
         },
       },
 
+      {
+        path: ":role/profile-settings",
+        name: "ProfileSettings",
+        component: ProfileSettings,
+        meta: {
+          title: "Profile Settings",
+          breadcrumb: "Profile Settings",
+          requiresAuth: true,
+          roles: ["user", "support", "admin"],
+        },
+      },
+
       // USER
       {
         path: "user/dashboard",
@@ -87,7 +100,7 @@ const routes = [
           title: "Tickets",
           breadcrumb: "Tickets",
           requiresAuth: true,
-          roles: ["user", "support", "admin"],
+          roles: ["support"],
         },
       },
 
@@ -99,19 +112,7 @@ const routes = [
           title: "Manage Users",
           breadcrumb: "Manage Users",
           requiresAuth: true,
-          roles: ["support", "admin"],
-        },
-      },
-
-      {
-        path: ":role/profile-settings",
-        name: "ProfileSettings",
-        component: ProfileSettings,
-        meta: {
-          title: "Profile Settings",
-          breadcrumb: "Profile Settings",
-          requiresAuth: true,
-          roles: ["user", "support", "admin"],
+          roles: ["support"],
         },
       },
 
@@ -123,6 +124,30 @@ const routes = [
         meta: {
           title: "Admin Dashboard",
           breadcrumb: "Admin Dashboard",
+          requiresAuth: true,
+          roles: ["admin"],
+        },
+      },
+
+      {
+        path: "admin/tickets",
+        name: "Tickets",
+        component: AdminTickets,
+        meta: {
+          title: "Tickets",
+          breadcrumb: "Tickets",
+          requiresAuth: true,
+          roles: ["admin"],
+        },
+      },
+
+      {
+        path: "admin/users",
+        name: "Manage Users",
+        component: AdminUsers,
+        meta: {
+          title: "Manage Users",
+          breadcrumb: "Manage Users",
           requiresAuth: true,
           roles: ["admin"],
         },

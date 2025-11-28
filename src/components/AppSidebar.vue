@@ -41,8 +41,8 @@ const menuItems: Record<UserRole, Array<{ title: string; url: string; icon: any 
 
     admin: [
         { title: "Dashboard", url: "/admin/dashboard", icon: Home },
-        { title: "Tickets", url: "/tickets", icon: Ticket },
-        { title: "Users", url: "/manage-users", icon: Users },
+        { title: "Tickets", url: "/admin/tickets", icon: Ticket },
+        { title: "Users", url: "/admin/users", icon: Users },
     ],
 };
 

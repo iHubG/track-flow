@@ -8,6 +8,12 @@ export interface TicketPreview {
   description: string;
   status: TicketStatus;
   priority: TicketPriority;
+  assigned_to: string | null;
+  assigned_user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
   created_at: string;
 }
 

@@ -14,6 +14,13 @@ export const getAllUsers = async (): Promise<User[]> => {
   return response.data;
 };
 
+// Fetch All Support Users
+export const getSupportUsers = async (): Promise<User[]> => {
+  const response = await api.get<User[]>("/api/users/support");
+  console.log("Support Users:", response.data);
+  return response.data;
+};
+
 // ======================================
 // 🔹 Fetch a SINGLE user by ID
 // ======================================
