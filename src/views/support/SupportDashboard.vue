@@ -4,15 +4,15 @@ import { RouterLink } from "vue-router"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
-    Users,
-    Headphones,
+    Clock,
     Ticket,
     Plus,
     Activity,
     CheckCircle2,
     TrendingUp,
     TrendingDown,
-    Minus
+    Minus,
+    Tickets
 } from "lucide-vue-next"
 import { useDashboard } from '@/composables/useDashboard';
 
@@ -35,7 +35,7 @@ const stats = computed(() => [
     {
         label: "Total Tickets",
         value: dashboardData.value?.total_assigned_tickets ?? 0,
-        icon: Users,
+        icon: Tickets,
         color: "from-blue-500 to-blue-400",
         description: "Assigned tickets",
         change: dashboardData.value?.assigned_change_tickets,
@@ -45,13 +45,13 @@ const stats = computed(() => [
         value: dashboardData.value?.total_completed_assigned_tickets ?? 0,
         icon: Ticket,
         color: "from-orange-500 to-orange-400",
-        description: "All assigned tickets",
+        description: "Completed assigned tickets",
         change: dashboardData.value?.total_completed_assigned_change,
     },
     {
         label: "Pending Tickets",
         value: dashboardData.value?.pending_assigned_tickets ?? 0,
-        icon: Headphones,
+        icon: Clock,
         color: "from-indigo-500 to-indigo-400",
         description: "Open tickets",
         change: dashboardData.value?.pending_assigned_change,
@@ -159,12 +159,12 @@ const getTrendColor = (change?: number) => {
                 <div class="flex justify-between items-center">
                     <CardTitle class="text-lg font-semibold">Recent Tickets</CardTitle>
 
-                    <Button variant="ghost" class="text-sm text-blue-600 hover:text-blue-700 transition">
-                        <RouterLink to="/support/tickets">
+                    <RouterLink to="/support/tickets">
+                        <Button variant="ghost" class="text-sm text-blue-600 hover:text-blue-700 transition">
                             View All
+                        </Button>
+                    </RouterLink>
 
-                        </RouterLink>
-                    </Button>
                 </div>
             </CardHeader>
             <CardContent>

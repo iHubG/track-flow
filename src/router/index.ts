@@ -170,6 +170,15 @@ const routes = [
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // 1) Browser Back/Forward — keep scroll position
+    if (savedPosition) {
+      return savedPosition;
+    }
+
+    // 2) Normal navigation — scroll to top
+    return { top: 0, behavior: "smooth" };
+  },
 });
 
 /* ======================================================
