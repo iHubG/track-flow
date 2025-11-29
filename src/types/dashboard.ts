@@ -2,6 +2,18 @@ export interface DashboardData {
   total_users: number;
   total_support: number;
   total_tickets: number;
+  total_assigned_tickets: number;
+  assigned_change_tickets: number;
+  new_assigned_tickets_today: number;
+  new_assigned_change: number;
+  pending_assigned_tickets: number;
+  pending_assigned_change: number;
+  active_assigned_tickets: number;
+  active_assigned_change: number;
+  resolved_assigned_tickets_today: number;
+  resolved_assigned_change: number;
+  total_completed_assigned_tickets: number;
+  total_completed_assigned_change: number;
   new_tickets_today: number;
   active_tickets_today: number;
   resolved_tickets_today: number;

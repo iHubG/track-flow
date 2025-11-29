@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref } from "vue"
 import { Trash, MoreHorizontal, Clock, CheckCircle, XCircle, ChevronDown } from "lucide-vue-next"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -42,7 +42,6 @@ const statuses = [
 
 const {
     tickets,
-    fetchAssignedTickets,
     loading,
 } = useAssignedTickets(supportUserId, true);
 

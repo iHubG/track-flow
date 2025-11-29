@@ -9,6 +9,9 @@ export interface TicketPreview {
   status: TicketStatus;
   priority: TicketPriority;
   assigned_to: string | null;
+  user: {
+    name: string;
+  };
   assigned_user?: {
     id: number;
     name: string;
